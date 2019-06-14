@@ -1,10 +1,19 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+    <div>
+      <b-navbar class="mb-2" type="dark" variant="dark">
+        <b-navbar-brand>MC2413</b-navbar-brand>
+        <b-collapse id="nav-collapse" is-nav>
+          <b-navbar-nav>
+            <b-nav-item to="/">Home</b-nav-item>
+            <b-nav-item to="/about">About</b-nav-item>
+          </b-navbar-nav>
+        </b-collapse>
+      </b-navbar>
     </div>
-    <router-view />
+    <b-container>
+      <router-view />
+    </b-container>
   </div>
 </template>
 
