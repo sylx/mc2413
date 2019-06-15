@@ -1,18 +1,18 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+    <mml-editor />
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from "@/components/HelloWorld.vue";
+import MmlEditor from "@/components/MmlEditor.vue";
 
+// require styles
 export default {
   name: "home",
   components: {
-    HelloWorld
+    MmlEditor
   }
 };
 </script>
