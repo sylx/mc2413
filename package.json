@@ -42,7 +42,10 @@
       "plugin:vue/essential",
       "@vue/prettier"
     ],
-    "rules": {},
+    "rules": {
+      "no-console": "off",
+      "no-unused-vars": "off"
+    },
     "parserOptions": {
       "parser": "babel-eslint"
     }
@@ -57,7 +60,7 @@
     "last 2 versions"
   ],
   "gitHooks": {
-
+    "pre-commit": "lint-staged"
   },
   "lint-staged": {
     "*.{js,vue}": [
