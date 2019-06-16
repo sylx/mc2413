@@ -1,4 +1,5 @@
 module.exports = {
+  runner: "jest-runner-prettier",
   moduleFileExtensions: ["js", "jsx", "json", "vue"],
   transform: {
     "^.+\\.vue$": "vue-jest",
@@ -18,5 +19,6 @@ module.exports = {
   watchPlugins: [
     "jest-watch-typeahead/filename",
     "jest-watch-typeahead/testname"
-  ]
+  ],
+  verbose: true
 };
