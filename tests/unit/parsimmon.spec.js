@@ -56,7 +56,7 @@ test("combi2", () => {
 });
 
 test("map", () => {
-  const note = P.regexp(/[a-g][\#\+\-]*/i).map(x => {
+  const note = P.regexp(/[a-g][#+-]*/i).map(x => {
     return x.toLowerCase();
   });
   expect(note.many().tryParse("cDE-")).toEqual(["c", "d", "e-"]);

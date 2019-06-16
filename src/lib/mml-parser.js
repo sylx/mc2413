@@ -32,7 +32,7 @@ const withLength = P.seq(
 const setLength = P.seq(
   P.alt(
     P.regexp(/l/i)
-      .map(s => s.toLowerCase)
+      .map(s => s.toLowerCase())
       .node("set_length"),
     tie
   ),
@@ -47,20 +47,25 @@ const amount = P.regexp(/\d+/)
 
 const withAmount = P.seq(
   P.alt(
-    P.regexp(/o/i).node("set_octave"),
-    P.regexp(/q/i).node("set_gate"),
-    P.regexp(/t/i).node("set_tempo")
+    P.regexp(/o/i).node("octave_set"),
+    P.regexp(/q/i).node("gate_set"),
+    P.regexp(/t/i).node("tempo_set")
   ),
   amount
 );
 
 const command = P.alt(
-  P.string(">").node("octave up"),
-  P.string("<").node("octave down")
+  P.string(">").node("octave_up"),
+  P.string("<").node("octave_down")
 );
 
-const MmlParser = P.alt(withLength, setLength, withAmount, command)
+const Mml = P.alt(withLength, setLength, withAmount, command)
   .skip(space)
-  .many();
+  .many()
+  .map(r => {
+    return r.flat().filter(x => {
+      return x;
+    });
+  });
 
-export default MmlParser;
+export default Mml;

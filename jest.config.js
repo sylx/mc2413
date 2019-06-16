@@ -1,5 +1,4 @@
 module.exports = {
-  runner: "jest-runner-prettier",
   moduleFileExtensions: ["js", "jsx", "json", "vue"],
   transform: {
     "^.+\\.vue$": "vue-jest",
