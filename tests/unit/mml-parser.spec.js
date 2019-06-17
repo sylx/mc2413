@@ -18,5 +18,5 @@ test("length", () => {
   expect(mml.parse("C4&D4")).toMatchObject({ status: true });
   expect(mml.parse("o1q2")).toMatchObject({ status: true });
   expect(mml.parse("cde>c<e")).toMatchObject({ status: true });
-  dumpAST("l8o4cde>c<ef8^32&>c\ncde");
+  dumpAST("l8q16o4cde>c<ef8^32&>c\ncde");
 });
