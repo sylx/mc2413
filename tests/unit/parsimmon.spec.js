@@ -61,3 +61,35 @@ test("map", () => {
   });
   expect(note.many().tryParse("cDE-")).toEqual(["c", "d", "e-"]);
 });
+
+test("gate", () => {
+  function rangeValue(min, max) {
+    return P((input, i) => {
+      const parser = P.regexp(/\d+/);
+      let r = parser._(input);
+      let v = parseInt(r.value);
+      console.log(input, i);
+      if (r.status && v >= min && v <= max) {
+        return P.makeSuccess(i + r.value.length, v);
+      } else {
+        return P.makeFailure(i, `${v} is out of range(${min},${max})`);
+      }
+    });
+  }
+  const hoge = P.string("hoge");
+  //  const parser=P.seq(hoge,rangeValue(1,8));
+  //  console.log(parser.parse("hoge008"));
+  const map = P.seq(
+    hoge,
+    P.regexp(/\d+/).map(x => {
+      let v = parseInt(x);
+      if (v >= 1 && v <= 8) {
+        return v;
+      } else {
+        return P.makeFailure(0, `out of range`);
+      }
+    })
+  );
+  //  console.log(map.parse("hoge0018"));
+  expect(true).toBe(true);
+});

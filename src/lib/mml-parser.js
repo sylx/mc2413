@@ -2,6 +2,10 @@ import P from "parsimmon";
 
 //空白+:は無視する
 const space = P.regexp(/[ \t:\r\n]*/);
+const number = P.regexp(/\d+/).map(a => {
+  return parseInt(a);
+});
+
 //音程
 const interval = P.regexp(/[a-g][#+-]*/i)
   .map(s => {
@@ -12,18 +16,14 @@ const interval = P.regexp(/[a-g][#+-]*/i)
 const rest = P.regexp(/r/i).node("rest");
 
 //音長
-const length = P.regexp(/[\d.^+\-\\]+/)
-  .map(s => {
-    return s;
-  })
+const length = P.alt(number, P.regexp(/[.^+\-\\]/))
+  .many()
   .node("length");
-
-const tie = P.string("^").node("tie");
 
 const slur = P.string("&").node("slur");
 
 const withLength = P.seq(
-  P.alt(interval, rest, tie),
+  P.alt(interval, rest),
   length.or(P.of("")), //optional
   slur.or(P.of("")) //optional
 );
@@ -33,17 +33,10 @@ const setLength = P.seq(
   P.alt(
     P.regexp(/l/i)
       .map(s => s.toLowerCase())
-      .node("set_length"),
-    tie
+      .node("set_length")
   ),
   length
 );
-
-const amount = P.regexp(/\d+/)
-  .map(a => {
-    return parseInt(a);
-  })
-  .node("amount");
 
 const withAmount = P.seq(
   P.alt(
@@ -51,7 +44,7 @@ const withAmount = P.seq(
     P.regexp(/q/i).node("gate_set"),
     P.regexp(/t/i).node("tempo_set")
   ),
-  amount
+  number
 );
 
 const command = P.alt(
@@ -59,12 +52,20 @@ const command = P.alt(
   P.string("<").node("octave_down")
 );
 
+function isEmpty(x) {
+  if (x.value) {
+    let v = x.value;
+    if (v.hasOwnProperty("length") && v.length == 0) return true;
+  }
+  return x ? false : true;
+}
+
 const Mml = P.alt(withLength, setLength, withAmount, command)
   .skip(space)
   .many()
   .map(r => {
     return r.flat().filter(x => {
-      return x;
+      return !isEmpty(x);
     });
   });
 
