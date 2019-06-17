@@ -1,10 +1,13 @@
 import P from "parsimmon";
 
-//空白+:は無視する
+//空白+:
 const space = P.regexp(/[ \t:\r\n]*/);
+//数値
 const number = P.regexp(/\d+/).map(a => {
   return parseInt(a);
 });
+//無
+const empty = P.of("").node("empty");
 
 //音程
 const interval = P.regexp(/[a-g][#+-]*/i)
@@ -20,12 +23,24 @@ const length = P.alt(number, P.regexp(/[.^+\-\\]/))
   .many()
   .node("length");
 
+//スラー
 const slur = P.string("&").node("slur");
 
+//コード
+const chord = P.seqMap(
+  P.string("'"),
+  interval.many(),
+  P.string("'"),
+  (qo, c, qc) => {
+    return c.map(x => x.value);
+  }
+).node("chord");
+
+//音調のあるもの(省略可)
 const withLength = P.seq(
-  P.alt(interval, rest),
-  length.or(P.of("")), //optional
-  slur.or(P.of("")) //optional
+  P.alt(interval, rest, chord),
+  length.or(empty), //optional
+  slur.or(empty) //optional
 );
 
 // ex)L8 L4. L4&16
@@ -33,7 +48,7 @@ const setLength = P.seq(
   P.alt(
     P.regexp(/l/i)
       .map(s => s.toLowerCase())
-      .node("set_length")
+      .node("length_set")
   ),
   length
 );
@@ -41,10 +56,11 @@ const setLength = P.seq(
 const withAmount = P.seq(
   P.alt(
     P.regexp(/o/i).node("octave_set"),
-    P.regexp(/q/i).node("gate_set"),
-    P.regexp(/t/i).node("tempo_set")
+    P.regexp(/q/i).node("quantize_set"),
+    P.regexp(/t/i).node("tempo_set"),
+    P.regexp(/t/i).node("velocity_set")
   ),
-  number
+  number.node("amount")
 );
 
 const command = P.alt(
@@ -65,7 +81,7 @@ const Mml = P.alt(withLength, setLength, withAmount, command)
   .many()
   .map(r => {
     return r.flat().filter(x => {
-      return !isEmpty(x);
+      return !isEmpty(x) && x.name != "empty";
     });
   });
 

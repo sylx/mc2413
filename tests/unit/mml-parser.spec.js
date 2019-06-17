@@ -29,4 +29,7 @@ test("length", () => {
   expect(dumpAST("l4q5")).toMatchObject({
     status: true
   });
+  expect(dumpAST("cde'ceg'2")).toMatchObject({
+    status: true
+  });
 });
