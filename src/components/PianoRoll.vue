@@ -1,36 +1,46 @@
 <template>
-  <div class="wrapper">
-    <svg>
+  <div ref="wrapper" ondragstart="return false;" ondrop="return false;">
+    <svg
+      @mousedown="onDrag('start', $event)"
+      @mouseup="onDrag('end', $event)"
+      @mousemove="onDrag('move', $event)"
+    >
       <defs>
         <pattern
           id="ptn-grid"
-          :width="16 * (quantize / 4)"
+          :width="quantize_width * quantize"
           height="112"
           patternUnits="userSpaceOnUse"
           patternContentUnits="userSpaceOnUse"
-          x="32"
+          :x="32 + grid_offset"
         >
           <g
-            v-for="b in util.range(quantize / 4)"
+            v-for="b in util.range(quantize)"
             :key="b"
-            :transform="getTranslate(b * 16, 0)"
+            :transform="getTransform(b * quantize_width, 0)"
           >
-            <rect class="a" width="16" height="112" />
-            <rect class="b" y="10" width="16" height="9" />
-            <rect class="b" y="28" width="16" height="9" />
-            <rect class="b" y="46" width="16" height="9" />
-            <rect class="b" y="74" width="16" height="10" />
-            <rect class="b" y="94" width="16" height="9" />
-            <line :class="b == 0 ? 'd' : 'c'" x1="0" y1="0" x2="0" y2="112" />
-            <line class="d" x1="0" y1="0" x2="16" y2="0" />
-            <line class="c" x1="0" y1="64" x2="16" y2="64" />
+            <rect class="a" y="0" :width="quantize_width" height="112" />
+            <rect class="b" y="10" :width="quantize_width" height="9" />
+            <rect class="b" y="28" :width="quantize_width" height="9" />
+            <rect class="b" y="46" :width="quantize_width" height="9" />
+            <rect class="b" y="74" :width="quantize_width" height="10" />
+            <rect class="b" y="94" :width="quantize_width" height="9" />
+            <line
+              :class="getLineClass(b, quantize)"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="112"
+            />
+            <line class="d" x1="0" y1="0" :x2="quantize_width" y2="0" />
+            <line class="c" x1="0" y1="64" :x2="quantize_width" y2="64" />
           </g>
         </pattern>
       </defs>
-      <g :transform="`scale(${scale})`">
+      <g :transform="getTransform(0, stage_pos.y * -1, scale)">
         <rect
           x="32"
-          width="100%"
+          :width="stage_width"
           :height="octaves * 112"
           fill="url(#ptn-grid)"
         ></rect>
@@ -38,7 +48,7 @@
           <g
             v-for="o in util.range(octaves)"
             :key="o"
-            :transform="getTranslate(0, (9 - o) * 112)"
+            :transform="getTransform(0, (9 - o) * 112)"
           >
             <rect class="a" y="96" width="32" height="16" />
             <rect class="a" y="80" width="32" height="16" />
@@ -71,29 +81,46 @@ svg {
     .b {
       fill: #212326;
     }
-    .c,
-    .d {
+    line {
       fill: none;
       stroke-miterlimit: 10;
       stroke-width: 1px;
     }
-    .c {
+    .c,
+    .tick {
       stroke: #36393b;
     }
-    .d {
+    .d,
+    .beat {
       stroke: #595b5d;
     }
+    .measure {
+      stroke-width: 2px;
+      stroke: lighten(#595b5d, 15%);
+    }
   }
-  #ptn-piano,
+  text {
+    user-select: none;
+  }
   #piano {
+    $whole-tone-color: #b7c1cc;
+    $half-tone-color: #5f6f7f;
     .a {
-      fill: #b7c1cc;
-      stroke: #5f6f7f;
+      fill: $whole-tone-color;
+      stroke: $half-tone-color;
       stroke-miterlimit: 10;
       stroke-width: 0.25px;
+      &:hover,
+      &.active {
+        fill: lighten($whole-tone-color, 15%);
+      }
     }
     .b {
-      fill: #5f6f7f;
+      fill: $half-tone-color;
+      &:hover,
+      &.active {
+        fill: lighten($half-tone-color, 15%);
+      }
     }
     .c {
       font-size: 6px;
@@ -114,19 +141,89 @@ export default {
     },
     quantize: {
       type: Number,
-      default: 16
+      default: 8
     }
   },
   data() {
     return {
       util: _,
-      octaves: 10
+      octaves: 10,
+      stage_pos: {
+        x: 0,
+        y: 0
+      },
+      stage_width: 10000,
+      last_pos: null
     };
   },
-  computed: {},
+  mounted() {
+    window.addEventListener("resize", this.updateStageWidth);
+    this.updateStageWidth();
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.updateStageWidth);
+  },
+  computed: {
+    quantize_width() {
+      return (16 * 16) / this.quantize;
+    },
+    grid_offset() {
+      return (this.stage_pos.x % (this.quantize_width * this.quantize)) * -1;
+    }
+  },
+  watch: {
+    scale(newVal, oldVal) {
+      this.stage_pos.x *= newVal / oldVal;
+      this.stage_pos.y *= newVal / oldVal;
+      this.updateStageWidth();
+    }
+  },
   methods: {
-    getTranslate(x, y) {
-      return `translate(${x},${y})`;
+    getTransform(x, y, scale) {
+      let s = "";
+      if (x !== null && y !== null) s += `translate(${x},${y})`;
+      if (scale) s += ` scale(${scale})`;
+      return s;
+    },
+    getLineClass(b, quantize) {
+      if (b == 0) return "measure";
+      return b % (quantize / 4) == 0 ? "beat" : "tick";
+    },
+    onDrag(type, e) {
+      switch (type) {
+        case "start":
+          this.last_pos = {
+            x: e.offsetX,
+            y: e.offsetY
+          };
+          break;
+        case "move":
+          if (!e.buttons) this.last_pos = null;
+          if (this.last_pos !== null) {
+            this.setStagePos(
+              this.stage_pos.x + (this.last_pos.x - e.offsetX),
+              this.stage_pos.y + (this.last_pos.y - e.offsetY)
+            );
+            this.last_pos = {
+              x: e.offsetX,
+              y: e.offsetY
+            };
+          }
+          break;
+        case "end":
+          this.last_pos = null;
+          break;
+      }
+    },
+    updateStageWidth() {
+      this.stage_width = this.$refs.wrapper.offsetWidth / this.scale;
+    },
+    setStagePos(x, y) {
+      this.stage_pos.x = Math.max(0, x);
+      this.stage_pos.y = Math.min(
+        Math.max(0, y),
+        112 * 10 * this.scale - this.$refs.wrapper.offsetHeight
+      );
     }
   }
 };
