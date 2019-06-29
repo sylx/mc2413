@@ -32,4 +32,5 @@ test("length", () => {
   expect(dumpAST("cde'ceg'2")).toMatchObject({
     status: true
   });
+  expect(mml.parse("'8'")).toMatchObject({ status: false });
 });

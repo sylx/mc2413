@@ -14,14 +14,18 @@ const interval = P.regexp(/[a-g][#+-]*/i)
   .map(s => {
     return s.toLowerCase();
   })
-  .node("interval");
+  .node("interval")
+  .desc("note");
 //休符
-const rest = P.regexp(/r/i).node("rest");
+const rest = P.regexp(/r/i)
+  .node("rest")
+  .desc("rest");
 
 //音長
 const length = P.alt(number, P.regexp(/[.^+\-\\]/))
   .many()
-  .node("length");
+  .node("length")
+  .desc("length");
 
 //スラー
 const slur = P.string("&").node("slur");
@@ -34,7 +38,9 @@ const chord = P.seqMap(
   (qo, c, qc) => {
     return c.map(x => x.value);
   }
-).node("chord");
+)
+  .node("chord")
+  .desc("chord");
 
 //音調のあるもの(省略可)
 const withLength = P.seq(
@@ -64,11 +70,12 @@ const withAmount = P.seq(
 );
 
 const command = P.alt(
-  P.string(">").node("octave_up"),
-  P.string("<").node("octave_down")
+  P.string(">").node("octave_shift"),
+  P.string("<").node("octave_shift")
 );
 
 function isEmpty(x) {
+  if (x.name && x.name == "empty") return true;
   if (x.value) {
     let v = x.value;
     if (v.hasOwnProperty("length") && v.length == 0) return true;
@@ -81,7 +88,7 @@ const Mml = P.alt(withLength, setLength, withAmount, command)
   .many()
   .map(r => {
     return r.flat().filter(x => {
-      return !isEmpty(x) && x.name != "empty";
+      return !isEmpty(x);
     });
   });
 
