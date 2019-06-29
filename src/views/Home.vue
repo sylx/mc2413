@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <b-row class="mb-2">
+    <b-row class="mb-2 pianoroll-control">
       <b-col md="2" lg="1">
         scale:{{ Number(pianoroll_scale).toFixed(2) }}
       </b-col>
@@ -11,10 +11,11 @@
           min="0.5"
           max="4"
           step="0.25"
+          variant="secondary"
         />
       </b-col>
       <b-col sm="4">
-        <b-dropdown :text="`grid:${pianoroll_quantize}`">
+        <b-dropdown :text="`grid:${pianoroll_quantize}`" class="btn-lg">
           <b-dropdown-item
             v-for="o in pianoroll_quantize_options"
             :key="o"
@@ -36,6 +37,15 @@
 <style lang="scss">
 .home {
   text-align: left;
+  .pianoroll-control {
+    height: 48px;
+    & > div:first-child {
+      padding-top: 12px;
+    }
+    & > div:nth-child(2) {
+      padding-top: 6px;
+    }
+  }
   .piano-roll {
     height: 300px;
   }
@@ -57,7 +67,7 @@ export default {
     return {
       pianoroll_scale: 2.0,
       pianoroll_quantize: 16,
-      pianoroll_quantize_options: [16, 12, 9, 8, 4, 3, 2, 1]
+      pianoroll_quantize_options: [32, 24, 16, 12, 9, 8, 4, 3, 2, 1]
     };
   }
 };
