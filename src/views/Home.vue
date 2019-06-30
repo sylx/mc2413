@@ -15,7 +15,7 @@
         />
       </b-col>
       <b-col sm="4">
-        <b-dropdown :text="`grid:${pianoroll_quantize}`" class="btn-lg">
+        <b-dropdown :text="`grid:${pianoroll_quantize}`">
           <b-dropdown-item
             v-for="o in pianoroll_quantize_options"
             :key="o"

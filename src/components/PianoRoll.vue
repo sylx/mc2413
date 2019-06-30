@@ -1,10 +1,6 @@
 <template>
   <div ref="wrapper" ondragstart="return false;" ondrop="return false;">
-    <svg
-      @mousedown="onDrag('start', $event)"
-      @mouseup="onDrag('end', $event)"
-      @mousemove="onDrag('move', $event)"
-    >
+    <svg>
       <defs>
         <pattern
           id="ptn-grid"
@@ -43,25 +39,38 @@
           :width="stage_width"
           :height="octaves * 112"
           fill="url(#ptn-grid)"
+          @mousedown="onDrag('start', $event)"
+          @mouseup="onDrag('end', $event)"
+          @mousemove="onDrag('move', $event)"
         ></rect>
         <g id="piano">
           <g
             v-for="o in util.range(octaves)"
-            :key="o"
+            :key="`key-${o}`"
+            :transform="getTransform(0, (9 - o) * 112)"
+            :data-octave="o"
+            @mousedown="onKeyboard('down', $event)"
+            @mousemove="onKeyboard('move', $event)"
+            @mouseup="onKeyboard('up', $event)"
+          >
+            <rect class="a" y="96" width="32" height="16" data-note="a" />
+            <rect class="a" y="80" width="32" height="16" data-note="d" />
+            <rect class="a" y="64" width="32" height="16" data-note="e" />
+            <rect class="a" y="48" width="32" height="16" data-note="f" />
+            <rect class="a" y="32" width="32" height="16" data-note="g" />
+            <rect class="a" y="16" width="32" height="16" data-note="a" />
+            <rect class="a" y="0" width="32" height="16" data-note="b" />
+            <rect class="b" y="94" width="20" height="8" data-note="c#" />
+            <rect class="b" y="74" width="20" height="8" data-note="d#" />
+            <rect class="b" y="46" width="20" height="8" data-note="f#" />
+            <rect class="b" y="28" width="20" height="8" data-note="g#" />
+            <rect class="b" y="10" width="20" height="8" data-note="a#" />
+          </g>
+          <g
+            v-for="o in util.range(octaves)"
+            :key="`key-text-${o}`"
             :transform="getTransform(0, (9 - o) * 112)"
           >
-            <rect class="a" y="96" width="32" height="16" />
-            <rect class="a" y="80" width="32" height="16" />
-            <rect class="a" y="64" width="32" height="16" />
-            <rect class="a" y="48" width="32" height="16" />
-            <rect class="a" y="32" width="32" height="16" />
-            <rect class="a" y="16" width="32" height="16" />
-            <rect class="a" y="0" width="32" height="16" />
-            <rect class="b" y="94" width="20" height="8" />
-            <rect class="b" y="74" width="20" height="8" />
-            <rect class="b" y="46" width="20" height="8" />
-            <rect class="b" y="28" width="20" height="8" />
-            <rect class="b" y="10" width="20" height="8" />
             <text class="c" transform="translate(22 108)">C{{ o }}</text>
           </g>
         </g>
@@ -72,6 +81,7 @@
 
 <style lang="scss">
 svg {
+  border: 1px solid #ccc;
   width: 100%;
   height: 100%;
   #ptn-grid {
@@ -212,6 +222,26 @@ export default {
           break;
         case "end":
           this.last_pos = null;
+          break;
+      }
+    },
+    onKeyboard(type, e) {
+      let note = e.target.dataset.note + e.target.parentNode.dataset.octave;
+      switch (type) {
+        case "down":
+          console.log(note);
+          this.$store.commit("test_keydown", note);
+          break;
+        case "up":
+          this.$store.commit("test_keyup");
+          break;
+        case "move":
+          if (this.$store.test_tone != note) {
+            this.$store.commit("test_keyup");
+            if (e.buttons) {
+              this.$store.commit("test_keydown", note);
+            }
+          }
           break;
       }
     },
