@@ -50,7 +50,7 @@ export default {
       code: "hoge hoge moemoe",
       cmOptions: {
         mode: "text/mml",
-        //        theme: "base16-dark",
+        theme: "base16-dark",
         lineNumbers: true,
         line: true
       }
