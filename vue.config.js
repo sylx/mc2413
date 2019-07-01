@@ -1,6 +1,6 @@
 module.exports = {
   outputDir: "dist",
-  publicPath: "/",
+  publicPath: "/mc2413/",
   devServer: {
     disableHostCheck: true
   }
