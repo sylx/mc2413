@@ -42,6 +42,7 @@
           @mousedown="onDrag('start', $event)"
           @mouseup="onDrag('end', $event)"
           @mousemove="onDrag('move', $event)"
+          @wheel="onDrag('wheel', $event)"
         ></rect>
         <g id="piano">
           <g
@@ -52,8 +53,9 @@
             @mousedown="onKeyboard('down', $event)"
             @mousemove="onKeyboard('move', $event)"
             @mouseup="onKeyboard('up', $event)"
+            @mouseout="onKeyboard('out', $event)"
           >
-            <rect class="a" y="96" width="32" height="16" data-note="a" />
+            <rect class="a" y="96" width="32" height="16" data-note="c" />
             <rect class="a" y="80" width="32" height="16" data-note="d" />
             <rect class="a" y="64" width="32" height="16" data-note="e" />
             <rect class="a" y="48" width="32" height="16" data-note="f" />
@@ -65,12 +67,6 @@
             <rect class="b" y="46" width="20" height="8" data-note="f#" />
             <rect class="b" y="28" width="20" height="8" data-note="g#" />
             <rect class="b" y="10" width="20" height="8" data-note="a#" />
-          </g>
-          <g
-            v-for="o in util.range(octaves)"
-            :key="`key-text-${o}`"
-            :transform="getTransform(0, (9 - o) * 112)"
-          >
             <text class="c" transform="translate(22 108)">C{{ o }}</text>
           </g>
         </g>
@@ -136,6 +132,9 @@ svg {
       font-size: 6px;
       fill: #212326;
       font-family: ArialMT, Arial;
+    }
+    text {
+      pointer-events: none;
     }
   }
 }
@@ -211,8 +210,8 @@ export default {
           if (!e.buttons) this.last_pos = null;
           if (this.last_pos !== null) {
             this.setStagePos(
-              this.stage_pos.x + (this.last_pos.x - e.offsetX),
-              this.stage_pos.y + (this.last_pos.y - e.offsetY)
+              this.stage_pos.x + (this.last_pos.x - e.offsetX) / this.scale,
+              this.stage_pos.y + (this.last_pos.y - e.offsetY) / this.scale
             );
             this.last_pos = {
               x: e.offsetX,
@@ -223,13 +222,18 @@ export default {
         case "end":
           this.last_pos = null;
           break;
+        case "wheel":
+          this.setStagePos(
+            this.stage_pos.x,
+            this.stage_pos.y + e.deltaY / 2.0 / this.scale
+          );
+          break;
       }
     },
     onKeyboard(type, e) {
       let note = e.target.dataset.note + e.target.parentNode.dataset.octave;
       switch (type) {
         case "down":
-          console.log(note);
           this.$store.commit("test_keydown", note);
           break;
         case "up":
@@ -242,6 +246,9 @@ export default {
               this.$store.commit("test_keydown", note);
             }
           }
+          break;
+        case "out":
+          this.$store.commit("test_keyup");
           break;
       }
     },
