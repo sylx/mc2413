@@ -45,7 +45,7 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "yarn.lock" }}
       - run:
-          name: Deploy
+          name: Deploy gh-pages
           command: |
             git config --global user.name "Circle CI"
             git config --global user.email "<>"
