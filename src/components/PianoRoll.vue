@@ -234,21 +234,18 @@ export default {
       let note = e.target.dataset.note + e.target.parentNode.dataset.octave;
       switch (type) {
         case "down":
-          this.$store.commit("test_keydown", note);
+          this.$store.dispatch("KEYON_TEST", note);
           break;
         case "up":
-          this.$store.commit("test_keyup");
+          this.$store.dispatch("KEYOFF_TEST");
           break;
         case "move":
-          if (this.$store.test_tone != note) {
-            this.$store.commit("test_keyup");
-            if (e.buttons) {
-              this.$store.commit("test_keydown", note);
-            }
+          if (e.buttons) {
+            this.$store.dispatch("KEYON_TEST", note);
           }
           break;
         case "out":
-          this.$store.commit("test_keyup");
+          this.$store.dispatch("KEYOFF_TEST");
           break;
       }
     },

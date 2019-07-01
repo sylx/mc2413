@@ -15,19 +15,25 @@ class Synth {
   keyOn(note, time) {
     this.tone.triggerAttack(note, time);
   }
+  keySet(note, time) {
+    this.tone.setNote(note, time);
+  }
   keyOff(time) {
     this.tone.triggerRelease(time);
   }
 }
 
+const synth = new Synth();
+
 const SynthPlugin = store => {
-  const synth = new Synth();
   store.subscribe((mutation, state) => {
-    if (mutation.type == "test_keydown") {
-      synth.keyOn(mutation.payload);
-    }
-    if (mutation.type == "test_keyup") {
-      synth.keyOff();
+    if (mutation.type == "UPDATE_TEST") {
+      let note = mutation.payload;
+      if (note) {
+        synth.keyOn(note);
+      } else {
+        synth.keyOff();
+      }
     }
   });
 };

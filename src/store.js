@@ -10,12 +10,24 @@ export default new Vuex.Store({
     test_tone: null
   },
   mutations: {
-    test_keydown(state, note) {
-      state.test_tone = note;
+    UPDATE_TEST(state, payload) {
+      state.test_tone = payload;
     },
-    test_keyup(state) {
-      state.test_tone = null;
-    }
+    UPDATE_SEQUENCE(state, payload) {}
   },
-  actions: {}
+  actions: {
+    KEYON_TEST(context, note) {
+      if (note != context.state.test_tone) {
+        context.commit("UPDATE_TEST", note);
+      }
+    },
+    KEYOFF_TEST(context) {
+      if (context.state.test_tone) {
+        context.commit("UPDATE_TEST", null);
+      }
+    },
+    CHANGE_MML(context, payload) {
+      context.commit("UPDATE_SEQUNCE", payload);
+    }
+  }
 });
