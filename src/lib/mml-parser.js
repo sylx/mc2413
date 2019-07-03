@@ -1,4 +1,5 @@
 import P from "parsimmon";
+import _ from "lodash";
 
 //空白+:
 const space = P.regexp(/[ \t:\r\n]*/);
@@ -19,7 +20,7 @@ const interval = P.regexp(/[a-g][#+-]*/i)
 //休符
 const rest = P.regexp(/r/i)
   .node("rest")
-  .desc("rest");
+  .desc("R");
 
 //音長
 const length = P.alt(number, P.regexp(/[.^+\-\\]/))
@@ -30,21 +31,9 @@ const length = P.alt(number, P.regexp(/[.^+\-\\]/))
 //スラー
 const slur = P.string("&").node("slur");
 
-//コード
-const chord = P.seqMap(
-  P.string("'"),
-  interval.many(),
-  P.string("'"),
-  (qo, c, qc) => {
-    return c.map(x => x.value);
-  }
-)
-  .node("chord")
-  .desc("chord");
-
-//音調のあるもの(省略可)
+//音長のあるもの(省略可)
 const withLength = P.seq(
-  P.alt(interval, rest, chord),
+  P.alt(interval, rest),
   length.or(empty), //optional
   slur.or(empty) //optional
 );
@@ -55,16 +44,25 @@ const setLength = P.seq(
     P.regexp(/l/i)
       .map(s => s.toLowerCase())
       .node("length_set")
+      .desc("L")
   ),
   length
 );
 
 const withAmount = P.seq(
   P.alt(
-    P.regexp(/o/i).node("octave_set"),
-    P.regexp(/q/i).node("quantize_set"),
-    P.regexp(/t/i).node("tempo_set"),
-    P.regexp(/t/i).node("velocity_set")
+    P.regexp(/o/i)
+      .node("octave_set")
+      .desc("O"),
+    P.regexp(/q/i)
+      .node("quantize_set")
+      .desc("Q"),
+    P.regexp(/t/i)
+      .node("tempo_set")
+      .desc("T"),
+    P.regexp(/v/i)
+      .node("velocity_set")
+      .desc("V")
   ),
   number.node("amount")
 );
@@ -83,7 +81,7 @@ function isEmpty(x) {
   return x ? false : true;
 }
 
-const Mml = P.alt(withLength, setLength, withAmount, command)
+const MmlParser = P.alt(withLength, setLength, withAmount, command)
   .skip(space)
   .many()
   .map(r => {
@@ -92,4 +90,136 @@ const Mml = P.alt(withLength, setLength, withAmount, command)
     });
   });
 
-export default Mml;
+class TokenScanner {
+  constructor(token) {
+    this.token = token;
+    this.index = 0;
+  }
+  hasNext() {
+    return this.index < this.token.length;
+  }
+  peek() {
+    return this.token[this.index] || null;
+  }
+  next() {
+    return this.token[this.index++];
+  }
+  match(name) {
+    let c = this.peek();
+    return c && c.name === name;
+  }
+  expect(name) {
+    let c = this.peek();
+    if (c && c.name == name) {
+      return this.next();
+    }
+    throw new SyntaxError(`compile error: Invalid token! expected ${name}`);
+  }
+}
+
+const MmlCompiler = src => {
+  let index = 1,
+    time = 0,
+    octave = 4,
+    length = 1,
+    velocity = 8 / 15,
+    quantize = 1.0;
+  let is_slur = false;
+
+  const calcDuration = (length, quantize) => {
+    return length * quantize;
+  };
+  const calcLength = (len, s) => {
+    let length = 0,
+      last_ln = null,
+      tie = 1;
+    len.forEach(ln => {
+      switch (ln) {
+        case "+":
+        case "^":
+          tie = 1;
+          break;
+        case "-":
+        case "\\":
+          tie = -1;
+          break;
+        case ".":
+          length += last_ln = (last_ln / 2) * tie;
+          break;
+        default:
+          length += last_ln = (4 / ln) * tie;
+          break;
+      }
+    });
+    return length;
+  };
+  const data = [];
+  const push = event => {
+    data.push(
+      _.merge(
+        {
+          id: index++
+        },
+        event
+      )
+    );
+  };
+
+  const token = MmlParser.parse(src);
+  if (token.status === false) {
+    const expected = token.expected.join(" or "),
+      line = 0,
+      column = 0;
+
+    throw new SyntaxError(
+      `parse error: expected ${expected} line:${line} col:${column}`
+    );
+  }
+  const scanner = new TokenScanner(token.value);
+
+  while (scanner.hasNext()) {
+    const s = scanner;
+    const c = s.next();
+    let ln;
+    switch (c.name) {
+      case "interval":
+        ln = s.match("length") ? calcLength(s.next().value) : length;
+        push({
+          type: is_slur ? "pitch" : "note",
+          interval: String(c.value) + String(octave),
+          time: time,
+          duration: s.match("slur") ? ln : calcDuration(ln, quantize),
+          velocity
+        });
+        time += ln;
+        is_slur = false;
+        break;
+      case "rest":
+        ln = s.match("length") ? calcLength(s.next().value) : length;
+        time += ln;
+        break;
+      case "octave_set":
+        octave = s.expect("amount").value;
+        break;
+      case "octave_shift":
+        octave += c.value == ">" ? 1 : -1;
+        break;
+      case "length_set":
+        length = calcLength(s.expect("length").value);
+        break;
+      case "velocity_set":
+        velocity = s.expect("amount").value / 15;
+        break;
+      case "quantize_set":
+        quantize = s.expect("amount").value / 8;
+        break;
+      case "slur":
+        is_slur = true;
+        break;
+    }
+  }
+  return data;
+};
+
+export default MmlCompiler;
+export { MmlParser, MmlCompiler };

@@ -93,3 +93,14 @@ test("gate", () => {
   //  console.log(map.parse("hoge0018"));
   expect(true).toBe(true);
 });
+
+test("error", () => {
+  expect(
+    P.string("hoge")
+      .desc("keyword_hoge")
+      .parse("moe")
+  ).toMatchObject({
+    status: false,
+    expected: ["keyword_hoge"]
+  });
+});
