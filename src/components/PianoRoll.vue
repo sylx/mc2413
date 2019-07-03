@@ -42,7 +42,7 @@
           @mousedown="onDrag('start', $event)"
           @mouseup="onDrag('end', $event)"
           @mousemove="onDrag('move', $event)"
-          @wheel="onDrag('wheel', $event)"
+          @wheel.prevent="onDrag('wheel', $event)"
         ></rect>
         <g id="piano">
           <g
