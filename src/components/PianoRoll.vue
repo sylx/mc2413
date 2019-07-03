@@ -234,18 +234,18 @@ export default {
       let note = e.target.dataset.note + e.target.parentNode.dataset.octave;
       switch (type) {
         case "down":
-          this.$store.dispatch("KEYON_TEST", note);
+          this.$store.dispatch("synth/noteOnTestTone", note);
           break;
         case "up":
-          this.$store.dispatch("KEYOFF_TEST");
+          this.$store.dispatch("synth/noteOffTestTone");
           break;
         case "move":
           if (e.buttons) {
-            this.$store.dispatch("KEYON_TEST", note);
+            this.$store.dispatch("synth/noteOnTestTone", note);
           }
           break;
         case "out":
-          this.$store.dispatch("KEYOFF_TEST");
+          this.$store.dispatch("synth/noteOffTestTone");
           break;
       }
     },
