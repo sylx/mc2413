@@ -1,22 +1,27 @@
+import { MmlCompiler as compileMML } from "../lib/mml-parser";
+
 import MmlParser from "@/lib/mml-parser";
 import _ from "lodash";
-
-const compileMML = text => {
-  return [
-    {
-      id: 1,
-      type: "note",
-      interval: "a4",
-      time: 4.0,
-      duration: 1.0
-    }
-  ];
-};
 
 export default {
   namespaced: true,
   state: {
-    sequence: []
+    sequence: [
+      {
+        id: 1,
+        type: "note",
+        interval: "a4",
+        time: 4.0,
+        duration: 1.0
+      },
+      {
+        id: 2,
+        type: "note",
+        interval: "b-4",
+        time: 3.0,
+        duration: 0.5
+      }
+    ]
   },
   getters: {
     noteSequence: state => {
