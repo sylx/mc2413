@@ -3,25 +3,30 @@ import { MmlCompiler as compileMML } from "../lib/mml-parser";
 import MmlParser from "@/lib/mml-parser";
 import _ from "lodash";
 
+const testSeq = text => {
+  let seq = [],
+    index = 0;
+  _.range(4, 2).forEach(o => {
+    ["a", "a+", "b", "c", "c+", "d", "d+", "e", "f", "f+", "g", "g+"].forEach(
+      n => {
+        seq.push({
+          id: ++index,
+          type: "note",
+          interval: `${n}${o}`,
+          time: index * 0.25,
+          duration: 1.0,
+          velocity: (1 / 12 / 2) * index
+        });
+      }
+    );
+  });
+  return seq;
+};
+
 export default {
   namespaced: true,
   state: {
-    sequence: [
-      {
-        id: 1,
-        type: "note",
-        interval: "a4",
-        time: 4.0,
-        duration: 1.0
-      },
-      {
-        id: 2,
-        type: "note",
-        interval: "b-4",
-        time: 3.0,
-        duration: 0.5
-      }
-    ]
+    sequence: testSeq()
   },
   getters: {
     noteSequence: state => {
