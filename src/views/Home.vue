@@ -38,7 +38,7 @@
         </b-button-group>
         <b-button disabled>
           <b-spinner small type="grow" v-if="transportPlaying"></b-spinner>
-          {{ transportPosition.replace(/\.\d+?$/, "") }}
+          {{ transportPositionBars }}
         </b-button>
       </b-col>
     </b-row>
@@ -71,6 +71,8 @@ import PianoRoll from "@/components/PianoRoll.vue";
 
 import { mapState } from "vuex";
 
+import _ from "lodash";
+
 // require styles
 export default {
   name: "home",
@@ -83,10 +85,16 @@ export default {
       pianoroll_scale: 2.0,
       pianoroll_quantize: 16,
       pianoroll_quantize_options: [32, 24, 16, 12, 9, 8, 4, 3, 2, 1],
-      transportPosition: "-"
+      transportPosition: 0
     };
   },
   computed: {
+    transportPositionBars() {
+      let m = _.padStart(Math.floor(this.transportPosition / 4), 3, "0"),
+        b = Math.floor(this.transportPosition % 4),
+        s = _.padStart(Math.floor((this.transportPosition % 1) * 16), 2, "0");
+      return `${m}:${b}:${s}`;
+    },
     ...mapState("synth", {
       transportPlaying: "transportPlaying"
     })

@@ -91,7 +91,10 @@ class Sequencer {
     transport.cancel();
     this.indicator = new Tone.Loop(
       (time => {
-        this.store.dispatch("synth/tickSequence", transport.position);
+        this.store.dispatch(
+          "synth/tickSequence",
+          Tone.Time(transport.position).toTicks() / 192
+        );
       }).bind(this),
       "12i"
     ).start();
@@ -107,7 +110,7 @@ class Sequencer {
           case "pitch":
             transport.schedule(time => {
               synth.tone.triggerAttackRelease(
-                evt.interval,
+                evt.interval.replace(/\+/, "#"),
                 Tone.Time(evt.duration * 192, "i"),
                 time,
                 evt.velocity

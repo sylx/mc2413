@@ -61,6 +61,14 @@ export default {
       this.x * this.scale,
       this.getYfromNote(this.y) * this.scale
     );
+
+    this.$store.subscribeAction((action, state) => {
+      if (action.type == "synth/tickSequence") {
+        const time = action.payload;
+        let x = time * 16 * 4;
+        this.setStagePos(x > 0 ? x : 0, this.stage_pos.y);
+      }
+    });
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.updateStageWidth);

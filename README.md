@@ -1,5 +1,7 @@
 # mc2413
 
+DEMO: https://sylx.github.io/mc2413/
+
 ## Project setup
 ```
 yarn install
