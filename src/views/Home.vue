@@ -1,12 +1,12 @@
 <template>
   <div class="home">
     <b-row class="mb-2 pianoroll-control">
-      <b-col xs="4">
-        <b-button disabled>
+      <b-col sm="2">
+        <b-button disabled class="float-left">
           scale:{{ Number(pianoroll_scale).toFixed(2) }}
         </b-button>
       </b-col>
-      <b-col xs="8">
+      <b-col sm="6">
         <b-form-input
           type="range"
           v-model.number="pianoroll_scale"
@@ -16,7 +16,7 @@
           variant="secondary"
         />
       </b-col>
-      <b-col xs="4">
+      <b-col sm="3">
         <b-dropdown :text="`grid:${pianoroll_quantize}`" class="float-right">
           <b-dropdown-item
             v-for="o in pianoroll_quantize_options"

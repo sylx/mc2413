@@ -109,7 +109,9 @@ class Sequencer {
       (evt => {
         switch (evt.type) {
           case "bpm":
-            transport.bpm.value = evt.bpm;
+            transport.schedule(time => {
+              transport.bpm.value = evt.bpm;
+            }, Tone.Time(evt.time * 192, "i"));
             break;
           case "note":
           case "pitch":
