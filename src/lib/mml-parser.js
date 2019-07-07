@@ -65,7 +65,7 @@ const withAmount = P.seq(
       .desc("V")
   ),
   number.node("amount")
-);
+).desc("number");
 
 const command = P.alt(
   P.string(">").node("octave_shift"),
