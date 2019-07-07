@@ -1,10 +1,12 @@
 <template>
   <div class="home">
     <b-row class="mb-2 pianoroll-control">
-      <b-col md="2" lg="1">
-        scale:{{ Number(pianoroll_scale).toFixed(2) }}
+      <b-col xs="4">
+        <b-button disabled>
+          scale:{{ Number(pianoroll_scale).toFixed(2) }}
+        </b-button>
       </b-col>
-      <b-col sm="4">
+      <b-col xs="8">
         <b-form-input
           type="range"
           v-model.number="pianoroll_scale"
@@ -14,8 +16,8 @@
           variant="secondary"
         />
       </b-col>
-      <b-col sm="4">
-        <b-dropdown :text="`grid:${pianoroll_quantize}`">
+      <b-col xs="4">
+        <b-dropdown :text="`grid:${pianoroll_quantize}`" class="float-right">
           <b-dropdown-item
             v-for="o in pianoroll_quantize_options"
             :key="o"
@@ -54,9 +56,6 @@
   text-align: left;
   .pianoroll-control {
     height: 48px;
-    & > div:first-child {
-      padding-top: 12px;
-    }
     & > div:nth-child(2) {
       padding-top: 6px;
     }
@@ -72,7 +71,6 @@ import MmlEditor from "@/components/MmlEditor.vue";
 import PianoRoll from "@/components/PianoRoll.vue";
 
 import StartAudioContext from "startaudiocontext";
-import Tone from "tone";
 import { mapState } from "vuex";
 
 import _ from "lodash";
@@ -114,7 +112,7 @@ export default {
   methods: {
     playTransport() {
       if (!this.initializedContext) {
-        StartAudioContext(Tone.context, "#start-context").then(
+        StartAudioContext(window.Tone.context, "#start-context").then(
           (() => {
             this.initializedContext = true;
           }).bind(this)
