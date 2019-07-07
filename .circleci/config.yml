@@ -31,13 +31,6 @@ jobs:
           name: Build
           command: yarn build
       - run:
-          name: Check dist
-          command: ls -la dist
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "yarn.lock" }}
-      - run:
           name: Deploy gh-pages
           command: |
             git config --global user.name "Circle CI"

@@ -36,6 +36,8 @@
     "bootstrap": "^4.3.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
+    "less": "^3.9.0",
+    "less-loader": "^5.0.0",
     "lint-staged": "^8.1.5",
     "mutationobserver-shim": "^0.3.3",
     "node-sass": "^4.12.0",
@@ -43,8 +45,7 @@
     "portal-vue": "^2.1.4",
     "sass-loader": "^7.1.0",
     "vue-cli-plugin-bootstrap-vue": "^0.4.0",
-    "vue-template-compiler": "^2.6.10",
-    "less-loader": "^5.0.0"
+    "vue-template-compiler": "^2.6.10"
   },
   "eslintConfig": {
     "root": true,
