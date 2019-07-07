@@ -87,8 +87,7 @@ export default {
       pianoroll_scale: 2.0,
       pianoroll_quantize: 16,
       pianoroll_quantize_options: [32, 24, 16, 12, 9, 8, 4, 3, 2, 1],
-      transportPosition: 0,
-      initializedContext: false
+      transportPosition: 0
     };
   },
   computed: {
@@ -108,16 +107,14 @@ export default {
         this.transportPosition = action.payload;
       }
     });
+    StartAudioContext(window.Tone.context, "#start-context").then(
+      (() => {
+        alert("startAudioContext");
+      }).bind(this)
+    );
   },
   methods: {
     playTransport() {
-      if (!this.initializedContext) {
-        StartAudioContext(window.Tone.context, "#start-context").then(
-          (() => {
-            this.initializedContext = true;
-          }).bind(this)
-        );
-      }
       this.$store.dispatch("synth/playSequence");
     },
     stopTransport() {
