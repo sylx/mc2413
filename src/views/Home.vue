@@ -107,11 +107,6 @@ export default {
         this.transportPosition = action.payload;
       }
     });
-    StartAudioContext(window.Tone.context, "#start-context").then(
-      (() => {
-        alert("startAudioContext");
-      }).bind(this)
-    );
   },
   methods: {
     playTransport() {
