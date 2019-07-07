@@ -94,10 +94,12 @@ class Sequencer {
     transport.cancel();
     this.indicator = new Tone.Loop(
       (time => {
-        this.store.dispatch(
-          "synth/tickSequence",
-          Tone.Time(transport.position).toTicks() / 192
-        );
+        Tone.Draw.schedule(() => {
+          this.store.dispatch(
+            "synth/tickSequence",
+            Tone.Time(transport.position).toTicks() / 192
+          );
+        }, time);
       }).bind(this),
       0.01
     ).start();
