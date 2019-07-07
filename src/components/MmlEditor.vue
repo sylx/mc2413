@@ -11,6 +11,8 @@
 .CodeMirror {
   text-align: left;
   border: 1px solid #ccc;
+  font-size: 150%;
+  line-height: 150%;
 }
 </style>
 
@@ -29,7 +31,7 @@ CM.defineMode("text/mml", () => {
         return null;
       } else if (stream.match(/[\d^&]+/)) {
         return "variable";
-      } else if (stream.match(/[tlvqo]/i)) {
+      } else if (stream.match(/[><tlvqo]/i)) {
         return "keyword";
       } else {
         stream.next();
@@ -66,7 +68,16 @@ export default {
     })
   },
   mounted() {
-    this.initCodeMirror(this.codemirror);
+    const cm = this.codemirror;
+    this.initCodeMirror(cm);
+    this.$store.subscribeAction((action, state) => {
+      if (action.type == "synth/noteOn") {
+        const note = action.payload,
+          start = new CM.Pos(note.start.line - 1, note.start.column - 1),
+          end = new CM.Pos(note.end.line - 1, note.end.column - 1);
+        cm.getDoc().setSelection(start, end);
+      }
+    });
   },
   methods: {
     initCodeMirror(cm) {
