@@ -80,7 +80,6 @@ export default {
           start = new CM.Pos(note.start.line - 1, note.start.column - 1),
           end = new CM.Pos(note.end.line - 1, note.end.column - 1);
         cm.getDoc().setSelection(start, end);
-        cm.getDoc().setCuror(end);
       }
     });
   },

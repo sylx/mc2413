@@ -33,7 +33,9 @@
     <b-row class="mb-4 tranport">
       <b-col sm="12">
         <b-button-group>
-          <b-button variant="success" @click="playTransport">Play</b-button>
+          <b-button variant="success" @click="playTransport" id="start-context"
+            >Play</b-button
+          >
           <b-button @click="stopTransport">Stop</b-button>
         </b-button-group>
         <b-button disabled>
@@ -69,6 +71,8 @@
 import MmlEditor from "@/components/MmlEditor.vue";
 import PianoRoll from "@/components/PianoRoll.vue";
 
+import StartAudioContext from "startaudiocontext";
+import Tone from "tone";
 import { mapState } from "vuex";
 
 import _ from "lodash";
@@ -85,7 +89,8 @@ export default {
       pianoroll_scale: 2.0,
       pianoroll_quantize: 16,
       pianoroll_quantize_options: [32, 24, 16, 12, 9, 8, 4, 3, 2, 1],
-      transportPosition: 0
+      transportPosition: 0,
+      initializedContext: false
     };
   },
   computed: {
@@ -108,6 +113,13 @@ export default {
   },
   methods: {
     playTransport() {
+      if (!this.initializedContext) {
+        StartAudioContext(Tone.context, "#start-context").then(
+          (() => {
+            this.initializedContext = true;
+          }).bind(this)
+        );
+      }
       this.$store.dispatch("synth/playSequence");
     },
     stopTransport() {
