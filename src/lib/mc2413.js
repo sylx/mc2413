@@ -33,6 +33,9 @@ class Synth {
   noteOff(time) {
     this.tone.triggerRelease(time);
   }
+  noteOnOff(note, duration, time, velocity) {
+    this.tone.triggerAttackRelease(note, duration, time, velocity);
+  }
   connectStore(store) {
     let test_note = null;
 
@@ -96,7 +99,7 @@ class Sequencer {
           Tone.Time(transport.position).toTicks() / 192
         );
       }).bind(this),
-      "12i"
+      0.01
     ).start();
 
     const data = [];
@@ -109,12 +112,18 @@ class Sequencer {
           case "note":
           case "pitch":
             transport.schedule(time => {
-              synth.tone.triggerAttackRelease(
+              synth.noteOnOff(
                 evt.interval.replace(/\+/, "#"),
                 Tone.Time(evt.duration * 192, "i"),
                 time,
                 evt.velocity
               );
+              Tone.Draw.schedule(() => {
+                this.store.dispatch("synth/noteOn", evt);
+              }, time);
+              Tone.Draw.schedule(() => {
+                this.store.dispatch("synth/noteOff", evt);
+              }, Tone.Time(Tone.Time(time).toTicks() + evt.duration * 192, "i"));
             }, Tone.Time(evt.time * 192, "i"));
             break;
         }

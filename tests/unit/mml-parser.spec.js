@@ -99,4 +99,15 @@ test("compile", () => {
       time: 1
     }
   ]);
+  expect(compile("t120 c4")).toMatchObject([
+    {
+      type: "bpm",
+      start: { offset: 0, line: 1, column: 1 },
+      end: { offset: 4, line: 1, column: 5 }
+    },
+    {
+      start: { offset: 5, line: 1, column: 6 },
+      end: { offset: 7, line: 1, column: 8 }
+    }
+  ]);
 });

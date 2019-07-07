@@ -101,6 +101,9 @@ class TokenScanner {
   peek() {
     return this.token[this.index] || null;
   }
+  prev() {
+    return this.index > 0 ? this.token[this.index - 1] || null : null;
+  }
   next() {
     return this.token[this.index++];
   }
@@ -192,7 +195,9 @@ const MmlCompiler = src => {
           interval: String(c.value) + String(octave),
           time: time,
           duration: s.match("slur") ? ln : calcDuration(ln, quantize),
-          velocity
+          velocity,
+          start: c.start,
+          end: s.prev().end
         });
         time += ln;
         is_slur = false;
@@ -223,7 +228,9 @@ const MmlCompiler = src => {
         push({
           type: "bpm",
           time: time,
-          bpm: parseInt(s.expect("amount").value)
+          bpm: parseInt(s.expect("amount").value),
+          start: c.start,
+          end: s.prev().end
         });
         break;
     }

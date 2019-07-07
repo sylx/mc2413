@@ -68,6 +68,14 @@ export default {
         let x = time * 16 * 4;
         this.setStagePos(x > 0 ? x : 0, this.stage_pos.y);
       }
+      if (action.type == "synth/noteOn") {
+        const note = action.payload;
+        this.flushKeyboard(true, note);
+      }
+      if (action.type == "synth/noteOff") {
+        const note = action.payload;
+        this.flushKeyboard(false, note, 100);
+      }
     });
   },
   beforeDestroy() {
@@ -223,6 +231,32 @@ export default {
             .rgb()
             .string()
         : color.rgb().string();
+    },
+    //bad function
+    flushKeyboard(on, note, delay) {
+      const nn = this.normalizeNote(note.interval);
+      const name = nn.name.toLowerCase(),
+        octave = nn.octave;
+      const dom = document.querySelector(
+        `#piano g[data-octave="${octave}"] rect[data-note="${name}"]`
+      );
+      if (dom) {
+        if (delay) {
+          setTimeout(() => {
+            if (on) {
+              dom.classList.add("active");
+            } else {
+              dom.classList.remove("active");
+            }
+          }, delay);
+        } else {
+          if (on) {
+            dom.classList.add("active");
+          } else {
+            dom.classList.remove("active");
+          }
+        }
+      }
     }
   }
 };

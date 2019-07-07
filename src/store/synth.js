@@ -82,6 +82,8 @@ export default {
     stopSequence(context) {
       context.commit("updateTransportPlaying", false);
     },
-    tickSequence(context, position) {}
+    tickSequence(context, position) {},
+    noteOn(context, evt) {},
+    noteOff(context, evt) {}
   }
 };
