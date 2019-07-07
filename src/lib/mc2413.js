@@ -6,7 +6,7 @@ class Synth {
   }
   initSynth() {
     this.masterChannel = new Tone.Channel({
-      volume: -20
+      volume: 0
     }).toMaster();
 
     this.tone = new Tone.Synth({
@@ -16,8 +16,8 @@ class Synth {
       portamento: 0.05
     }).connect(this.masterChannel);
   }
-  noteOn(note, time) {
-    this.tone.triggerAttack(note, time);
+  noteOn(note, velocity, time) {
+    this.tone.triggerAttack(note, time, velocity);
   }
   noteChange(note, time) {
     this.tone.setNote(note, time);
@@ -35,7 +35,7 @@ class Synth {
         case "synth/noteOnTestTone":
           if (test_note != payload) {
             if (test_note === null) {
-              this.noteOn(payload);
+              this.noteOn(payload, 0.5);
             } else {
               this.noteChange(payload);
             }
