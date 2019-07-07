@@ -1,6 +1,9 @@
 <template>
   <div>
     <codemirror ref="cm" :value="mml" :options="cmOptions" />
+    <b-alert class="mt-4" v-if="mmlError" show variant="danger">{{
+      mmlError.msg
+    }}</b-alert>
   </div>
 </template>
 
@@ -24,9 +27,9 @@ CM.defineMode("text/mml", () => {
     token(stream, state) {
       if (stream.match(/[a-g][+#-]*/i)) {
         return null;
-      } else if (stream.match(/\d+/)) {
+      } else if (stream.match(/[\d^&]+/)) {
         return "variable";
-      } else if (stream.match(/[tlvq]/i)) {
+      } else if (stream.match(/[tlvqo]/i)) {
         return "keyword";
       } else {
         stream.next();
@@ -58,7 +61,8 @@ export default {
       return this.$refs.cm.codemirror;
     },
     ...mapState("synth", {
-      mml: "mml"
+      mml: "mml",
+      mmlError: "mmlError"
     })
   },
   mounted() {

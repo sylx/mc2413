@@ -34,8 +34,8 @@ const slur = P.string("&").node("slur");
 //音長のあるもの(省略可)
 const withLength = P.seq(
   P.alt(interval, rest),
-  length.or(empty), //optional
-  slur.or(empty) //optional
+  length.or(empty).skip(space), //optional
+  slur.or(empty).skip(space) //optional
 );
 
 // ex)L8 L4. L4&16
@@ -135,6 +135,8 @@ const MmlCompiler = src => {
       tie = 1;
     len.forEach(ln => {
       switch (ln) {
+        case 0:
+          break;
         case "+":
         case "^":
           tie = 1;
@@ -151,6 +153,7 @@ const MmlCompiler = src => {
           break;
       }
     });
+    if (length <= 0) throw new SyntaxError(`compile error: Invalid length!`);
     return length;
   };
   const data = [];

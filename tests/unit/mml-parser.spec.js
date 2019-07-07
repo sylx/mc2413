@@ -71,7 +71,7 @@ test("compile", () => {
       duration: 1.0
     }
   ]);
-  expect(compile("q4 a&b c")).toMatchObject([
+  expect(compile("q4 a & b c")).toMatchObject([
     {
       type: "note",
       duration: 1

@@ -30,12 +30,13 @@ export default {
   namespaced: true,
   state: {
     mml: initialMML,
+    mmlError: null,
     sequence: compileMML(initialMML)
   },
   getters: {
     noteSequence: state => {
       return state.sequence.filter(evt => {
-        return evt.type == "note";
+        return evt.type == "note" || evt.type == "pitch";
       });
     }
   },
@@ -45,6 +46,9 @@ export default {
     },
     updateMml: (state, mml) => {
       state.mml = mml;
+    },
+    updateMmlError: (state, error) => {
+      state.mmlError = error;
     }
   },
   actions: {
@@ -54,12 +58,16 @@ export default {
       context.commit("updateMml", text);
       try {
         context.commit("updateSequence", compileMML(text));
+        context.commit("updateMmlError", null);
       } catch (e) {
         context.dispatch("errorMML", e);
       }
     },
     errorMML(context, e) {
       console.error(e.toString());
+      context.commit("updateMmlError", {
+        msg: e.toString()
+      });
     },
     changePianoRoll(context, sequence) {
       context.commit("updateSequence", sequence);
