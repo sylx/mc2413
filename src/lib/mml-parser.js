@@ -58,7 +58,7 @@ const withAmount = P.seq(
       .node("quantize_set")
       .desc("Q"),
     P.regexp(/t/i)
-      .node("tempo_set")
+      .node("bpm_set")
       .desc("T"),
     P.regexp(/v/i)
       .node("velocity_set")
@@ -218,6 +218,13 @@ const MmlCompiler = src => {
         break;
       case "slur":
         is_slur = true;
+        break;
+      case "bpm_set":
+        push({
+          type: "bpm",
+          time: time,
+          bpm: parseInt(s.expect("amount").value)
+        });
         break;
     }
   }

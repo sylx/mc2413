@@ -85,4 +85,18 @@ test("compile", () => {
       time: 2
     }
   ]);
+  expect(compile("t120 c4 t138")).toMatchObject([
+    {
+      type: "bpm",
+      bpm: 120
+    },
+    {
+      type: "note"
+    },
+    {
+      type: "bpm",
+      bpm: 138,
+      time: 1
+    }
+  ]);
 });
