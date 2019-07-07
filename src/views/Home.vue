@@ -30,6 +30,19 @@
       :scale="pianoroll_scale"
       :quantize="pianoroll_quantize"
     />
+    <b-row class="mb-4 tranport">
+      <b-col sm="12">
+        <b-button-group>
+          <b-button variant="success" @click="playTransport">Play</b-button>
+          <b-button @click="stopTransport">Stop</b-button>
+        </b-button-group>
+        <b-button disabled>
+          <b-spinner small type="grow" v-if="transportPlaying"></b-spinner>
+          {{ transportPosition.replace(/\.\d+?$/, "") }}
+        </b-button>
+      </b-col>
+    </b-row>
+
     <mml-editor />
   </div>
 </template>
@@ -56,6 +69,8 @@
 import MmlEditor from "@/components/MmlEditor.vue";
 import PianoRoll from "@/components/PianoRoll.vue";
 
+import { mapState } from "vuex";
+
 // require styles
 export default {
   name: "home",
@@ -67,8 +82,29 @@ export default {
     return {
       pianoroll_scale: 2.0,
       pianoroll_quantize: 16,
-      pianoroll_quantize_options: [32, 24, 16, 12, 9, 8, 4, 3, 2, 1]
+      pianoroll_quantize_options: [32, 24, 16, 12, 9, 8, 4, 3, 2, 1],
+      transportPosition: "-"
     };
+  },
+  computed: {
+    ...mapState("synth", {
+      transportPlaying: "transportPlaying"
+    })
+  },
+  mounted() {
+    this.$store.subscribeAction((action, state) => {
+      if (action.type == "synth/tickSequence") {
+        this.transportPosition = action.payload;
+      }
+    });
+  },
+  methods: {
+    playTransport() {
+      this.$store.dispatch("synth/playSequence");
+    },
+    stopTransport() {
+      this.$store.dispatch("synth/stopSequence");
+    }
   }
 };
 </script>

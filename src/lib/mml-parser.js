@@ -189,7 +189,7 @@ const MmlCompiler = src => {
         ln = s.match("length") ? calcLength(s.next().value) : length;
         push({
           type: is_slur ? "pitch" : "note",
-          interval: String(c.value) + String(octave),
+          interval: String(c.value.replace(/\+/, "#")) + String(octave),
           time: time,
           duration: s.match("slur") ? ln : calcDuration(ln, quantize),
           velocity

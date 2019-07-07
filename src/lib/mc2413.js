@@ -1,19 +1,27 @@
 import Tone from "tone";
 
+window.Tone = Tone;
+
 class Synth {
   constructor() {
     this.initSynth();
   }
   initSynth() {
     this.masterChannel = new Tone.Channel({
-      volume: 0
+      volume: -10
     }).toMaster();
 
     this.tone = new Tone.Synth({
       oscillator: {
-        type: "sine"
+        type: "square"
       },
-      portamento: 0.05
+      envelope: {
+        attack: 0.005,
+        decay: 0.1,
+        sustain: 0.3,
+        release: 0.01
+      },
+      portamento: 0.0
     }).connect(this.masterChannel);
   }
   noteOn(note, velocity, time) {
@@ -53,12 +61,62 @@ class Synth {
   }
 }
 
+const transport = Tone.Transport;
+
 class Sequencer {
   constructor(synth) {
     this.synth = synth;
+    transport.PPQ = 192;
+    transport.loop = false;
   }
   connectStore(store) {
-    store.subscribe((mutation, state) => {});
+    this.store = store;
+    store.subscribeAction((action, state) => {
+      let type = action.type,
+        payload = action.payload;
+      switch (type) {
+        case "synth/playSequence":
+          if (transport.state == "started") transport.stop(0);
+          this.storeEvent(state);
+          transport.start();
+          break;
+        case "synth/stopSequence":
+          transport.stop();
+          break;
+      }
+    });
+  }
+  storeEvent(state) {
+    const synth = this.synth;
+    transport.cancel();
+    this.indicator = new Tone.Loop(
+      (time => {
+        this.store.dispatch("synth/tickSequence", transport.position);
+      }).bind(this),
+      "12i"
+    ).start();
+
+    const data = [];
+    state.synth.sequence.forEach(
+      (evt => {
+        switch (evt.type) {
+          case "bpm":
+            transport.bpm.value = evt.bpm;
+            break;
+          case "note":
+          case "pitch":
+            transport.schedule(time => {
+              synth.tone.triggerAttackRelease(
+                evt.interval,
+                Tone.Time(evt.duration * 192, "i"),
+                time,
+                evt.velocity
+              );
+            }, Tone.Time(evt.time * 192, "i"));
+            break;
+        }
+      }).bind(this)
+    );
   }
 }
 
