@@ -75,11 +75,15 @@ export default {
     const cm = this.codemirror;
     this.initCodeMirror(cm);
     this.$store.subscribeAction((action, state) => {
-      if (action.type == "synth/noteOn") {
-        const note = action.payload,
-          start = new CM.Pos(note.start.line - 1, note.start.column - 1),
+      const note = action.payload;
+      let start, end;
+      switch (action.type) {
+        case "synth/noteOn":
+        case "synth/selectNote":
+          start = new CM.Pos(note.start.line - 1, note.start.column - 1);
           end = new CM.Pos(note.end.line - 1, note.end.column - 1);
-        cm.getDoc().setSelection(start, end);
+          cm.getDoc().setSelection(start, end);
+          break;
       }
     });
   },

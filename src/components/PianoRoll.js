@@ -50,7 +50,8 @@ export default {
         y: 0
       },
       stage_width: 10000,
-      last_pos: null
+      last_pos: null,
+      selection: null
     };
   },
   mounted() {
@@ -215,7 +216,7 @@ export default {
     getXfromLength(len) {
       return len * 16 * 4;
     },
-    getNoteColor(note, dark) {
+    getNoteColor(note, active) {
       const v = note.velocity;
       let color;
       if (v > 0.5) {
@@ -225,9 +226,9 @@ export default {
         color = Color(NOTE_COLOR_MIN);
         color = color.mix(Color(NOTE_COLOR_MID), v * 2);
       }
-      return dark
+      return active
         ? color
-            .darken(0.5)
+            .lighten(0.5)
             .rgb()
             .string()
         : color.rgb().string();
@@ -257,6 +258,14 @@ export default {
           }
         }
       }
+    },
+    onClickNote(evt, note) {
+      if (this.selection) {
+        this.$set(this.selection, "selected", false);
+      }
+      this.$set(note, "selected", true);
+      this.selection = note;
+      this.$store.dispatch("synth/selectNote", note);
     }
   }
 };

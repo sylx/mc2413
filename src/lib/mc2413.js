@@ -57,6 +57,15 @@ class Synth {
           this.noteOff();
           test_note = null;
           break;
+        case "synth/selectNote":
+          this.noteOn(payload.interval.replace(/\+/, "#"), 0.5);
+          setTimeout(
+            (() => {
+              this.noteOff();
+            }).bind(this),
+            250
+          );
+          break;
         default:
           break;
       }

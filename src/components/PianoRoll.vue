@@ -54,12 +54,13 @@
                 getYfromNote(n.interval)
               )
             "
+            @click="onClickNote($event, n)"
           >
             <rect
               class="note"
               :width="getXfromLength(n.duration)"
               :height="getHeightfromNote(n.interval)"
-              :fill="getNoteColor(n)"
+              :fill="getNoteColor(n, n.selected)"
               :stroke="getNoteColor(n, true)"
             />
             <text v-if="scale >= 2.0" transform="translate(2 6.5)">

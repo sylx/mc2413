@@ -90,6 +90,7 @@ export default {
     },
     tickSequence(context, position) {},
     noteOn(context, evt) {},
-    noteOff(context, evt) {}
+    noteOff(context, evt) {},
+    selectNote(context, note) {}
   }
 };
