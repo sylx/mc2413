@@ -24,17 +24,22 @@ class Synth {
       portamento: 0.0
     }).connect(this.masterChannel);
   }
-  noteOn(note, velocity, time) {
-    this.tone.triggerAttack(note, time, velocity);
+  noteOn(interval, velocity, time) {
+    this.tone.triggerAttack(this.normalizeInterval(interval), time, velocity);
   }
-  noteChange(note, time) {
-    this.tone.setNote(note, time);
+  noteChange(interval, time) {
+    this.tone.setNote(this.normalizeInterval(interval), time);
   }
   noteOff(time) {
     this.tone.triggerRelease(time);
   }
-  noteOnOff(note, duration, time, velocity) {
-    this.tone.triggerAttackRelease(note, duration, time, velocity);
+  noteOnOff(interval, duration, time, velocity) {
+    this.tone.triggerAttackRelease(
+      this.normalizeInterval(interval),
+      duration,
+      time,
+      velocity
+    );
   }
   connectStore(store) {
     let test_note = null;
@@ -58,7 +63,7 @@ class Synth {
           test_note = null;
           break;
         case "synth/selectNote":
-          this.noteOn(payload.interval.replace(/\+/, "#"), 0.5);
+          this.noteOn(payload.interval, 0.5);
           setTimeout(
             (() => {
               this.noteOff();
@@ -70,6 +75,29 @@ class Synth {
           break;
       }
     });
+  }
+  normalizeInterval(interval) {
+    const trans = {
+      "A+": "A#",
+      "A-": "G#",
+      "B+": "C",
+      "B-": "A#",
+      "C+": "C#",
+      "C-": "B",
+      "D+": "D#",
+      "D-": "C#",
+      "E+": "F",
+      "E-": "D#",
+      "F+": "F#",
+      "F-": "E",
+      "G+": "G#",
+      "G-": "F#"
+    };
+    let n = interval.toUpperCase().match(/([A-G][#+-]*)(\d+)/);
+    if (!n) return "";
+    let name = n[1];
+    if (trans[n[1]]) name = trans[n[1]];
+    return name + n[2];
   }
 }
 
@@ -126,7 +154,7 @@ class Sequencer {
           case "pitch":
             transport.schedule(time => {
               synth.noteOnOff(
-                evt.interval.replace(/\+/, "#"),
+                evt.interval,
                 Tone.Time(evt.duration * 192, "i"),
                 time,
                 evt.velocity
