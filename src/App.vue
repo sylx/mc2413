@@ -45,7 +45,7 @@ import MC2413 from "./lib/mc2413.js";
 let mc2413 = new MC2413();
 
 export default {
-  name: "root",
+  name: "app",
   mounted() {
     mc2413.connectStore(this.$store);
   }

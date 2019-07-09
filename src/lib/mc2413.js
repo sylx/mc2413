@@ -138,7 +138,7 @@ class Sequencer {
           );
         }, time);
       }).bind(this),
-      0.01
+      0.05
     ).start();
 
     const data = [];

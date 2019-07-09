@@ -64,6 +64,7 @@ export default {
     );
 
     this.$store.subscribeAction((action, state) => {
+      let timer = null;
       if (action.type == "synth/tickSequence") {
         const time = action.payload;
         let x = time * 16 * 4;
@@ -71,6 +72,21 @@ export default {
       }
       if (action.type == "synth/noteOn") {
         const note = action.payload;
+        const y = this.getYfromNote(note.interval) * this.scale;
+        if (
+          y < this.stage_pos.y ||
+          y > this.stage_pos.y + this.$refs.wrapper.offsetHeight
+        ) {
+          if (timer) clearTimeout(timer);
+          this.$refs.stage.classList.add("trans");
+          this.setStagePos(
+            this.stage_pos.x,
+            y - this.$refs.wrapper.offsetHeight / 2
+          );
+          timer = _.delay(() => {
+            this.$refs.stage.classList.remove("trans");
+          }, 500);
+        }
         this.flushKeyboard(true, note);
       }
       if (action.type == "synth/noteOff") {
@@ -238,24 +254,22 @@ export default {
       const nn = this.normalizeNote(note.interval);
       const name = nn.name.toLowerCase(),
         octave = nn.octave;
-      const dom = document.querySelector(
-        `#piano g[data-octave="${octave}"] rect[data-note="${name}"]`
+
+      const dom = this.$refs.piano.querySelector(
+        `g[data-octave="${octave}"] rect[data-note="${name}"]`
       );
       if (dom) {
-        if (delay) {
-          setTimeout(() => {
-            if (on) {
-              dom.classList.add("active");
-            } else {
-              dom.classList.remove("active");
-            }
-          }, delay);
-        } else {
+        const fn = () => {
           if (on) {
             dom.classList.add("active");
           } else {
             dom.classList.remove("active");
           }
+        };
+        if (delay) {
+          _.delay(fn, delay);
+        } else {
+          fn();
         }
       }
     },

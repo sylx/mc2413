@@ -33,7 +33,7 @@
           </g>
         </pattern>
       </defs>
-      <g :transform="getTransform(0, stage_pos.y * -1, scale)">
+      <g :transform="getTransform(0, stage_pos.y * -1, scale)" ref="stage">
         <rect
           x="32"
           :width="stage_width"
@@ -68,7 +68,7 @@
             </text>
           </g>
         </g>
-        <g id="piano">
+        <g id="piano" ref="piano">
           <g
             v-for="o in util.range(octaves)"
             :key="`key-${o}`"
@@ -174,6 +174,9 @@ svg {
       font-family: ArialMT, Arial;
       pointer-events: none;
     }
+  }
+  .trans {
+    transition: all 0.5s ease-in-out;
   }
 }
 </style>
