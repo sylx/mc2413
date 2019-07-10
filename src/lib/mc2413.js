@@ -166,6 +166,15 @@ class Sequencer {
                 this.store.dispatch("synth/noteOff", evt);
               }, Tone.Time(Tone.Time(time).toTicks() + evt.duration * 192, "i"));
             }, Tone.Time(evt.time * 192, "i"));
+
+            if (evt.time > 2) {
+              transport.schedule(time => {
+                Tone.Draw.schedule(() => {
+                  this.store.dispatch("synth/beforeNoteOn", evt);
+                }, time);
+              }, Tone.Time((evt.time - 2) * 192, "i"));
+            }
+
             break;
         }
       }).bind(this)

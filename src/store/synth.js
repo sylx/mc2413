@@ -73,6 +73,7 @@ export default {
         context.dispatch("errorMML", e);
       }
     },
+    changeCursorMML(context, pos) {},
     errorMML(context, e) {
       console.error(e.toString());
       context.commit("updateMmlError", {
@@ -89,6 +90,7 @@ export default {
       context.commit("updateTransportPlaying", false);
     },
     tickSequence(context, position) {},
+    beforeNoteOn(context, evt) {},
     noteOn(context, evt) {},
     noteOff(context, evt) {},
     selectNote(context, note) {}

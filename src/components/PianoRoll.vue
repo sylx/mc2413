@@ -44,21 +44,18 @@
           @mousemove="onDrag('move', $event)"
           @wheel.prevent="onDrag('wheel', $event)"
         ></rect>
-        <g id="note" :transform="getTransform(stage_pos.x * -1, 0)">
+        <g id="note" :transform="getTransform(stage_pos.x * -1, 0)" ref="note">
           <g
             v-for="n in note"
             :key="n.id"
             :transform="
-              getTransform(
-                getXfromLength(n.time) + 32,
-                getYfromNote(n.interval)
-              )
+              getTransform(getXfromTime(n.time) + 32, getYfromNote(n.interval))
             "
             @click="onClickNote($event, n)"
           >
             <rect
               class="note"
-              :width="getXfromLength(n.duration)"
+              :width="getXfromTime(n.duration)"
               :height="getHeightfromNote(n.interval)"
               :fill="getNoteColor(n, n.selected)"
               :stroke="getNoteColor(n, true)"
@@ -68,6 +65,16 @@
             </text>
           </g>
         </g>
+        <rect
+          v-if="cursorX"
+          class="cursor"
+          :transform="getTransform(stage_pos.x * -1, 0)"
+          :x="cursorX + 32"
+          width="2"
+          :height="octaves * 112"
+          ref="cursor"
+        />
+
         <g id="piano" ref="piano">
           <g
             v-for="o in util.range(octaves)"
@@ -174,6 +181,12 @@ svg {
       font-family: ArialMT, Arial;
       pointer-events: none;
     }
+  }
+  .cursor {
+    stroke-miterlimit: 10;
+    stroke-width: 0.25px;
+    fill: #000;
+    stroke: #b14f70;
   }
   .trans {
     transition: all 0.5s ease-in-out;

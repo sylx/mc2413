@@ -51,7 +51,8 @@ export default {
       },
       stage_width: 10000,
       last_pos: null,
-      selection: null
+      selection: null,
+      cursorX: null
     };
   },
   mounted() {
@@ -67,31 +68,35 @@ export default {
       let timer = null;
       if (action.type == "synth/tickSequence") {
         const time = action.payload;
-        let x = time * 16 * 4;
+        let x = this.getXfromTime(time);
         this.setStagePos(x > 0 ? x : 0, this.stage_pos.y);
+      }
+      if (action.type == "synth/beforeNoteOn") {
+        const note = action.payload;
+        this.setCenterInterval(note.interval);
       }
       if (action.type == "synth/noteOn") {
         const note = action.payload;
-        const y = this.getYfromNote(note.interval) * this.scale;
-        if (
-          y < this.stage_pos.y ||
-          y > this.stage_pos.y + this.$refs.wrapper.offsetHeight
-        ) {
-          if (timer) clearTimeout(timer);
-          this.$refs.stage.classList.add("trans");
-          this.setStagePos(
-            this.stage_pos.x,
-            y - this.$refs.wrapper.offsetHeight / 2
-          );
-          timer = _.delay(() => {
-            this.$refs.stage.classList.remove("trans");
-          }, 500);
-        }
         this.flushKeyboard(true, note);
       }
       if (action.type == "synth/noteOff") {
         const note = action.payload;
         this.flushKeyboard(false, note, 100);
+      }
+      if (action.type == "synth/changeCursorMML") {
+        const pos = action.payload;
+        let note = null,
+          last = { line: 1, column: 1 };
+        this.note.some(n => {
+          if (n.start.line >= pos.line && n.end.column > pos.column) {
+            note = n;
+            return true;
+          }
+        });
+        if (note) {
+          this.setCenterInterval(note.interval, note.time);
+          this.cursorX = this.getXfromTime(note.time);
+        }
       }
     });
   },
@@ -229,7 +234,7 @@ export default {
       const n = this.normalizeNote(note);
       return NOTE_MAP[n.name].height;
     },
-    getXfromLength(len) {
+    getXfromTime(len) {
       return len * 16 * 4;
     },
     getNoteColor(note, active) {
@@ -280,6 +285,32 @@ export default {
       this.$set(note, "selected", true);
       this.selection = note;
       this.$store.dispatch("synth/selectNote", note);
+    },
+    setCenterInterval(interval, time) {
+      let y = this.getYfromNote(interval) * this.scale,
+        x =
+          this.getXfromTime(time) -
+          this.$refs.wrapper.offsetWidth / 2 / this.scale;
+      if (x < 0) x = 0;
+      let ydir = null;
+      if (y < this.stage_pos.y) ydir = "up";
+      if (y > this.stage_pos.y + this.$refs.wrapper.offsetHeight) ydir = "down";
+
+      if (ydir || x != this.stage_pos.x) {
+        if (this.timer) clearTimeout(this.timer);
+        this.$refs.stage.classList.add("trans");
+        this.setStagePos(
+          time ? x : this.stage_pos.x,
+          ydir
+            ? ydir == "up"
+              ? y
+              : y - this.$refs.wrapper.offsetHeight
+            : this.stage_pos.y
+        );
+        this.timer = _.delay(() => {
+          this.$refs.stage.classList.remove("trans");
+        }, 500);
+      }
     }
   }
 };

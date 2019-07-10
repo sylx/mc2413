@@ -80,9 +80,14 @@ export default {
       switch (action.type) {
         case "synth/noteOn":
         case "synth/selectNote":
+          this.changeCursorByProc = true;
           start = new CM.Pos(note.start.line - 1, note.start.column - 1);
           end = new CM.Pos(note.end.line - 1, note.end.column - 1);
           cm.getDoc().setSelection(start, end);
+          cm.focus();
+          if (action.type == "synth/selectNote") {
+            cm.setCursor(end);
+          }
           break;
       }
     });
@@ -91,6 +96,17 @@ export default {
     initCodeMirror(cm) {
       cm.on("change", (cm, ch) => {
         this.$store.dispatch("synth/changeMML", cm.getValue());
+      });
+      cm.on("cursorActivity", cm => {
+        if (this.changeCursorByProc) {
+          this.changeCursorByProc = false;
+          return;
+        }
+        const cursor = cm.getCursor();
+        this.$store.dispatch("synth/changeCursorMML", {
+          line: cursor.line + 1,
+          column: cursor.ch + 1
+        });
       });
     }
   }
