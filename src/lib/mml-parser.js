@@ -2,7 +2,8 @@ import P from "parsimmon";
 import _ from "lodash";
 
 //空白+:
-const space = P.regexp(/[ \t:\r\n]*/);
+const space = P.regexp(/[ \t:\r\n]*/).node("empty");
+const space_exists = P.regexp(/[ \t:\r\n]+/).node("empty");
 //数値
 const number = P.regexp(/\d+/).map(a => {
   return parseInt(a);
@@ -11,7 +12,7 @@ const number = P.regexp(/\d+/).map(a => {
 const empty = P.of("").node("empty");
 
 //音程
-const interval = P.regexp(/[a-g][#+-]*/i)
+const interval = P.regexp(/[a-g][#+-]?/i)
   .map(s => {
     return s.toLowerCase();
   })
@@ -83,7 +84,14 @@ function isEmpty(x) {
   return x ? false : true;
 }
 
-const MmlParser = P.alt(withLength, setLength, withAmount, command, comment)
+const MmlParser = P.alt(
+  withLength,
+  setLength,
+  withAmount,
+  command,
+  comment,
+  space_exists
+)
   .skip(space)
   .many()
   .map(r => {
