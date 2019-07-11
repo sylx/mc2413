@@ -31,10 +31,12 @@ CM.defineMode("text/mml", () => {
     token(stream, state) {
       if (stream.match(/[a-gr][+#-]*/i)) {
         return "operator";
-      } else if (stream.match(/[\d^&]+/)) {
+      } else if (stream.match(/[\d^.&]+/)) {
         return "number";
       } else if (stream.match(/[><tlvqo]/i)) {
         return "keyword";
+      } else if (stream.match(/\/\/.*/)) {
+        return "comment";
       } else {
         stream.next();
         return null;

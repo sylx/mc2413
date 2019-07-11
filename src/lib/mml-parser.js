@@ -73,7 +73,7 @@ const command = P.alt(
   P.string("<").node("octave_shift")
 );
 
-const comment = P.seqMap(P.string("//"), P.regexp(/.+/), (a, b) => "");
+const comment = P.seqMap(P.string("//"), P.regexp(/.*/), (a, b) => "");
 
 function isEmpty(x) {
   if (x.name && x.name == "empty") return true;
