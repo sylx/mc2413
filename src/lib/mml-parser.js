@@ -72,6 +72,8 @@ const command = P.alt(
   P.string("<").node("octave_shift")
 );
 
+const comment = P.seqMap(P.string("//"), P.regexp(/.+/), (a, b) => "");
+
 function isEmpty(x) {
   if (x.name && x.name == "empty") return true;
   if (x.value) {
@@ -81,7 +83,7 @@ function isEmpty(x) {
   return x ? false : true;
 }
 
-const MmlParser = P.alt(withLength, setLength, withAmount, command)
+const MmlParser = P.alt(withLength, setLength, withAmount, command, comment)
   .skip(space)
   .many()
   .map(r => {

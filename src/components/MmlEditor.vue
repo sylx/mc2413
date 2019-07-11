@@ -86,7 +86,7 @@ export default {
           cm.getDoc().setSelection(start, end);
           cm.focus();
           if (action.type == "synth/selectNote") {
-            cm.setCursor(end);
+            cm.setCursor(start);
           }
           break;
       }

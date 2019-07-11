@@ -18,7 +18,7 @@ function dumpSEQ(text) {
 
 test("simple note", () => {
   expect(mml.parse("c")).toMatchObject({ status: true });
-  expect(mml.parse("c8.")).toMatchObject({ status: true });
+  expect(mml.parse("cde")).toMatchObject({ status: true });
   expect(mml.parse("8c")).toMatchObject({ status: false });
 });
 
@@ -110,4 +110,20 @@ test("compile", () => {
       end: { offset: 7, line: 1, column: 8 }
     }
   ]);
+});
+
+test("comment", () => {
+  expect(mml.parse("// comment")).toMatchObject({ status: true });
+  expect(mml.parse("cde // comment")).toMatchObject({
+    status: true,
+    value: [{ name: "interval" }, { name: "interval" }, { name: "interval" }]
+  });
+  expect(
+    mml.parse(`
+c
+`)
+  ).toMatchObject({
+    status: true,
+    value: [{ name: "interval" }]
+  });
 });
