@@ -76,9 +76,7 @@ export default {
     changeCursorMML(context, pos) {},
     errorMML(context, e) {
       console.error(e.toString());
-      context.commit("updateMmlError", {
-        msg: e.toString()
-      });
+      context.commit("updateMmlError", e);
     },
     changePianoRoll(context, sequence) {
       context.commit("updateSequence", sequence);

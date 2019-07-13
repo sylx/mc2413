@@ -2,7 +2,7 @@
   <div>
     <codemirror ref="cm" :value="mml" :options="cmOptions" />
     <b-alert class="mt-4" v-if="mmlError" show variant="danger">{{
-      mmlError.msg
+      mmlError.message
     }}</b-alert>
   </div>
 </template>
@@ -23,10 +23,12 @@ import "../assets/mid-school2.less";
 
 import "codemirror/addon/selection/active-line.js";
 import "codemirror/addon/selection/mark-selection.js";
+import "codemirror/addon/lint/lint.js";
+import "codemirror/addon/lint/lint.css";
 
 import CM from "codemirror";
 
-CM.defineMode("text/mml", () => {
+CM.defineMode("mml", () => {
   return {
     token(stream, state) {
       if (stream.match(/[a-gr][+#-]*/i)) {
@@ -45,6 +47,17 @@ CM.defineMode("text/mml", () => {
   };
 });
 
+let lastError = null;
+CM.registerHelper("lint", "mml", function(text, cm) {
+  const err = lastError;
+  if (err) {
+    const start = new CM.Pos(err.start.line - 1, err.start.column - 1),
+      end = new CM.Pos(err.end.line - 1, err.end.column - 1);
+    return [{ from: start, to: end, message: err.message }];
+  }
+  return [];
+});
+
 // require styles
 export default {
   name: "mml-editor",
@@ -54,13 +67,15 @@ export default {
   data() {
     return {
       cmOptions: {
-        mode: "text/mml",
+        mode: "mml",
         theme: "mid-school2",
         lineNumbers: true,
         line: true,
         lineWrapping: true,
         styleActiveLine: true,
-        styleSelectedText: true
+        styleSelectedText: true,
+        lint: true,
+        gutters: ["CodeMirror-lint-markers"]
       }
     };
   },
@@ -76,6 +91,11 @@ export default {
   mounted() {
     const cm = this.codemirror;
     this.initCodeMirror(cm);
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type == "synth/updateMmlError") {
+        lastError = mutation.payload;
+      }
+    });
     this.$store.subscribeAction((action, state) => {
       const note = action.payload;
       let start, end;

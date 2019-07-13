@@ -100,6 +100,20 @@ const MmlParser = P.alt(
     });
   });
 
+const triggerError = (message, start, end) => {
+  const err = new SyntaxError(message);
+  err.start = _.clone(start);
+  if (end) {
+    err.end = _.clone(end);
+  } else {
+    err.end = {
+      line: start.line,
+      column: start.column + 1
+    };
+  }
+  throw err;
+};
+
 class TokenScanner {
   constructor(token) {
     this.token = token;
@@ -126,7 +140,7 @@ class TokenScanner {
     if (c && c.name == name) {
       return this.next();
     }
-    throw new SyntaxError(`compile error: Invalid token! expected ${name}`);
+    triggerError(`compile error: Expected ${name}`, c.start, c.end);
   }
 }
 
@@ -142,7 +156,8 @@ const MmlCompiler = src => {
   const calcDuration = (length, quantize) => {
     return length * quantize;
   };
-  const calcLength = (len, s) => {
+  const calcLength = node => {
+    const len = node.value;
     let length = 0,
       last_ln = null,
       tie = 1;
@@ -166,7 +181,9 @@ const MmlCompiler = src => {
           break;
       }
     });
-    if (length <= 0) throw new SyntaxError(`compile error: Invalid length!`);
+    if (length <= 0) {
+      triggerError(`compile error: Invalid length`, node.start, node.end);
+    }
     return length;
   };
   const data = [];
@@ -183,12 +200,17 @@ const MmlCompiler = src => {
 
   const token = MmlParser.parse(src);
   if (token.status === false) {
-    const expected = token.expected.join(" or "),
-      line = 0,
-      column = 0;
-
-    throw new SyntaxError(
-      `parse error: expected ${expected} line:${line} col:${column}`
+    const expected = token.expected.join(" or ");
+    triggerError(
+      `parse error: expected ${expected}`,
+      {
+        line: token.index.line,
+        column: token.index.column
+      },
+      {
+        line: token.index.line,
+        column: src.split(/\n/)[token.index.line].length
+      }
     );
   }
   const scanner = new TokenScanner(token.value);
@@ -199,7 +221,7 @@ const MmlCompiler = src => {
     let ln;
     switch (c.name) {
       case "interval":
-        ln = s.match("length") ? calcLength(s.next().value) : length;
+        ln = s.match("length") ? calcLength(s.next()) : length;
         push({
           type: is_slur ? "pitch" : "note",
           interval: String(c.value) + String(octave),
@@ -213,7 +235,7 @@ const MmlCompiler = src => {
         is_slur = false;
         break;
       case "rest":
-        ln = s.match("length") ? calcLength(s.next().value) : length;
+        ln = s.match("length") ? calcLength(s.next()) : length;
         time += ln;
         break;
       case "octave_set":
@@ -223,7 +245,7 @@ const MmlCompiler = src => {
         octave += c.value == ">" ? 1 : -1;
         break;
       case "length_set":
-        length = calcLength(s.expect("length").value);
+        length = calcLength(s.expect("length"));
         break;
       case "velocity_set":
         velocity = s.expect("amount").value / 15;
