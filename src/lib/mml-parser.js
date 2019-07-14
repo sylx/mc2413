@@ -114,6 +114,10 @@ const triggerError = (message, start, end) => {
   throw err;
 };
 
+const limit = (min, max, value) => {
+  return Math.max(min, Math.min(max, value));
+};
+
 class TokenScanner {
   constructor(token) {
     this.token = token;
@@ -239,19 +243,20 @@ const MmlCompiler = src => {
         time += ln;
         break;
       case "octave_set":
-        octave = s.expect("amount").value;
+        octave = limit(0, 9, s.expect("amount").value);
         break;
       case "octave_shift":
         octave += c.value == ">" ? 1 : -1;
+        octave = limit(0, 8, octave);
         break;
       case "length_set":
         length = calcLength(s.expect("length"));
         break;
       case "velocity_set":
-        velocity = s.expect("amount").value / 15;
+        velocity = limit(0, 1, s.expect("amount").value / 15);
         break;
       case "quantize_set":
-        quantize = s.expect("amount").value / 8;
+        quantize = limit(0, 1, s.expect("amount").value / 8);
         break;
       case "slur":
         is_slur = true;
@@ -260,7 +265,7 @@ const MmlCompiler = src => {
         push({
           type: "bpm",
           time: time,
-          bpm: parseInt(s.expect("amount").value),
+          bpm: limit(1, 600, s.expect("amount").value),
           start: c.start,
           end: s.prev().end
         });

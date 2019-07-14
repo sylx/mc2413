@@ -23,7 +23,8 @@ const testSeq = text => {
   return seq;
 };
 
-const initialMML = `T90L16
+const initialMML = `//J.S.Bach Invention No.13
+T90L16
 REA>C<BEB>DC8E8<G+8>E8 <AEA>C <BEB>DC8<A8R4R
 >ECE<A>C<EGF8A8>D8F8. D<B>D<GBDFE8G8>C8E8. C<A>C<F8>D8. <BGBE8>C8. <AFAD8B8>C4R4
 <RG>CED<G>DFE8G8<B8>G8 C<G>CED<G>DFE8C8G8E8 >C<AEACE<A>CD8F+8A8>C8< BGDG<B>D<GB>C8E8G8B8
