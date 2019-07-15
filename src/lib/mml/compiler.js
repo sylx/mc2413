@@ -69,7 +69,8 @@ class MmlCompiler {
     this.tracks[name] = _.merge(
       {
         time: 0,
-        data: []
+        data: [],
+        name
       },
       this.defaultParams
     );
@@ -159,7 +160,8 @@ class MmlCompiler {
       track.data.push(
         _.merge(
           {
-            id: this.index++
+            id: this.index++,
+            tr: track.name
           },
           event
         )

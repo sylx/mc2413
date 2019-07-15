@@ -67,10 +67,10 @@
         </g>
         <rect
           v-if="cursorX"
-          class="cursor"
+          class="cursor trans"
           :transform="getTransform(stage_pos.x * -1, 0)"
           :x="cursorX + 32"
-          width="2"
+          :width="Math.max(2, 4 / scale)"
           :height="octaves * 112"
           ref="cursor"
         />
@@ -184,9 +184,9 @@ svg {
   }
   .cursor {
     stroke-miterlimit: 10;
-    stroke-width: 0.25px;
+    stroke-width: 0.5px;
     fill: #000;
-    stroke: #b14f70;
+    stroke: #fff; /* #b14f70;*/
   }
   .trans {
     transition: all 0.5s ease-in-out;

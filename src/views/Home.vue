@@ -28,22 +28,22 @@
       </b-col>
     </b-row>
     <piano-roll
-      class="piano-roll mb-4"
+      class="piano-roll mb-2"
       :scale="pianoroll_scale"
       :quantize="pianoroll_quantize"
     />
-    <b-row class="mb-4 tranport">
+    <b-row class="mb-2 tranport">
       <b-col sm="12">
-        <b-button-group>
+        <b-button-group size="sm">
           <b-button variant="success" @click="playTransport" id="start-context"
             >Play</b-button
           >
           <b-button @click="stopTransport">Stop</b-button>
+          <b-button disabled>
+            <b-spinner small type="grow" v-if="transportPlaying"></b-spinner>
+            {{ transportPositionBars }}
+          </b-button>
         </b-button-group>
-        <b-button disabled>
-          <b-spinner small type="grow" v-if="transportPlaying"></b-spinner>
-          {{ transportPositionBars }}
-        </b-button>
       </b-col>
     </b-row>
 
@@ -61,7 +61,7 @@
     }
   }
   .piano-roll {
-    height: 300px;
+    height: 350px;
   }
 }
 </style>

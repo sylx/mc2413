@@ -16,6 +16,7 @@
 
 <script>
 import { mapState } from "vuex";
+import _ from "lodash";
 import { codemirror } from "vue-codemirror";
 import "codemirror/lib/codemirror.css";
 //import "codemirror/theme/base16-dark.css";
@@ -31,7 +32,7 @@ import CM from "codemirror";
 CM.defineMode("mml", () => {
   return {
     token(stream, state) {
-      if (stream.match(/^[a-z0-9]+/) && stream.column() == 0) {
+      if (stream.column() == 0 && stream.match(/^[a-z0-9]+/)) {
         return "qualifier";
       } else if (stream.match(/[a-gr][+#-]*/i)) {
         return "operator";
@@ -102,16 +103,25 @@ export default {
       const note = action.payload;
       let start, end;
       switch (action.type) {
-        case "synth/noteOn":
+        case "synth/playSequence":
+          this.selections = {};
+          break;
         case "synth/selectNote":
+        case "synth/noteOn":
+          if (action.type == "synth/selectNote") this.selections = {};
           this.changeCursorByProc = true;
           start = new CM.Pos(note.start.line - 1, note.start.column - 1);
           end = new CM.Pos(note.end.line - 1, note.end.column - 1);
-          cm.getDoc().setSelection(start, end);
-          cm.focus();
+
+          this.selections[note.tr] = { anchor: start, head: end };
+          cm.getDoc().setSelections(_.values(this.selections));
           if (action.type == "synth/selectNote") {
+            cm.focus();
             cm.setCursor(start);
           }
+          break;
+        case "synth/noteOff":
+          delete this.selections[note.tr];
           break;
       }
     });
