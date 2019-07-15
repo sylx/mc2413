@@ -1,26 +1,6 @@
 import { MmlCompiler as compileMML } from "../lib/mml";
 import _ from "lodash";
 
-const testSeq = text => {
-  let seq = [],
-    index = 0;
-  _.range(4, 2).forEach(o => {
-    ["a", "a+", "b", "c", "c+", "d", "d+", "e", "f", "f+", "g", "g+"].forEach(
-      n => {
-        seq.push({
-          id: ++index,
-          type: "note",
-          interval: `${n}${o}`,
-          time: index * 0.25,
-          duration: 1.0,
-          velocity: (1 / 12 / 2) * index
-        });
-      }
-    );
-  });
-  return seq;
-};
-
 const initialMML = `//J.S.Bach Invention No.13
 T90L16
 REA>C<BEB>DC8E8<G+8>E8 <AEA>C <BEB>DC8<A8R4R
