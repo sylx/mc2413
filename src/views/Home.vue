@@ -84,7 +84,7 @@ export default {
   },
   data() {
     return {
-      pianoroll_scale: 2.0,
+      pianoroll_scale: 1.0,
       pianoroll_quantize: 16,
       pianoroll_quantize_options: [32, 24, 16, 12, 9, 8, 4, 3, 2, 1],
       transportPosition: 0
