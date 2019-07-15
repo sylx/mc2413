@@ -142,7 +142,7 @@ class Sequencer {
     ).start();
 
     const data = [];
-    state.synth.sequence.forEach(
+    state.synth.sequence.a.forEach(
       (evt => {
         switch (evt.type) {
           case "bpm":
