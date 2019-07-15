@@ -17,7 +17,31 @@ test("time & length", () => {
         type: "note",
         interval: "a4",
         time: 2.0,
-        duration: 0.75
+        duration: 0.5 + 0.25 + 0.125 - 0.125
+      }
+    ]
+  });
+});
+test("tie & set_length", () => {
+  expect(compile("a L8 c2^.^")).toMatchObject({
+    a: [
+      {
+        id: 1,
+        type: "note",
+        interval: "c4",
+        time: 0.0,
+        duration: 2.0 + 0.5 + 0.25 + 0.5
+      }
+    ]
+  });
+  expect(compile("a L8 c2-.-")).toMatchObject({
+    a: [
+      {
+        id: 1,
+        type: "note",
+        interval: "c4",
+        time: 0.0,
+        duration: 2.0 - 0.5 - 0.25 - 0.5
       }
     ]
   });

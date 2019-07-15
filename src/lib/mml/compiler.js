@@ -115,29 +115,40 @@ class MmlCompiler {
       const len = node.value;
       let length = 0,
         last_ln = null,
+        is_tie = false,
         tie = 1;
       len.forEach(ln => {
+        if (is_tie && !String(ln).match(/^\d+$/)) {
+          last_ln = track.length;
+          length += last_ln * tie;
+        }
         switch (ln) {
           case 0:
             break;
           case "+":
           case "^":
             tie = 1;
+            is_tie = true;
             break;
-          case "-":
           case "\\":
+          case "-":
             tie = -1;
+            is_tie = true;
             break;
           case ".":
-            length += last_ln = (last_ln / 2) * tie;
+            last_ln = last_ln / 2;
+            length += last_ln * tie;
+            is_tie = false;
             break;
           default:
-            length += last_ln = (4 / ln) * tie;
+            last_ln = 4 / ln;
+            length += last_ln * tie;
+            is_tie = false;
             break;
         }
       });
-      if (tie) {
-        length += track.length;
+      if (is_tie) {
+        length += track.length * tie;
       }
       if (length <= 0) {
         triggerError(`compile error: Invalid length`, node.start, node.end);
