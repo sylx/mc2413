@@ -1,9 +1,12 @@
 import Tone from "tone";
+import _ from "lodash";
 
 window.Tone = Tone;
 
 class Synth {
   constructor() {
+    this.tone = {};
+    this.selected_tone = "a";
     this.initSynth();
   }
   initSynth() {
@@ -11,7 +14,10 @@ class Synth {
       volume: -10
     }).toMaster();
 
-    this.tone = new Tone.Synth({
+    this.createChannel("a");
+  }
+  createChannel(name) {
+    const tone = new Tone.Synth({
       oscillator: {
         type: "square"
       },
@@ -22,19 +28,33 @@ class Synth {
         release: 0.01
       },
       portamento: 0.0
-    }).connect(this.masterChannel);
+    });
+    tone.connect(this.masterChannel);
+    tone.name = name;
+    this.tone[name] = tone;
   }
-  noteOn(interval, velocity, time) {
-    this.tone.triggerAttack(this.normalizeInterval(interval), time, velocity);
+  getTone(name) {
+    if (!name) name = this.selected_tone;
+    return this.tone[name];
   }
-  noteChange(interval, time) {
-    this.tone.setNote(this.normalizeInterval(interval), time);
+  selectTone(name) {
+    this.selected_tone = name;
   }
-  noteOff(time) {
-    this.tone.triggerRelease(time);
+  noteOn(interval, velocity, time, channel) {
+    this.getTone(channel).triggerAttack(
+      this.normalizeInterval(interval),
+      time,
+      velocity
+    );
   }
-  noteOnOff(interval, duration, time, velocity) {
-    this.tone.triggerAttackRelease(
+  noteChange(interval, time, channel) {
+    this.getTone(channel).setNote(this.normalizeInterval(interval), time);
+  }
+  noteOff(time, channel) {
+    this.getTone(channel).triggerRelease(time);
+  }
+  noteOnOff(interval, duration, time, velocity, channel) {
+    this.getTone(channel).triggerAttackRelease(
       this.normalizeInterval(interval),
       duration,
       time,
@@ -127,7 +147,6 @@ class Sequencer {
     });
   }
   storeEvent(state) {
-    const synth = this.synth;
     transport.cancel();
     this.indicator = new Tone.Loop(
       (time => {
@@ -142,43 +161,49 @@ class Sequencer {
     ).start();
 
     const data = [];
-    state.synth.sequence.a.forEach(
-      (evt => {
-        switch (evt.type) {
-          case "bpm":
-            transport.schedule(time => {
-              transport.bpm.value = evt.bpm;
-            }, Tone.Time(evt.time * 192, "i"));
-            break;
-          case "note":
-          case "pitch":
-            transport.schedule(time => {
-              synth.noteOnOff(
-                evt.interval,
-                Tone.Time(evt.duration * 192, "i"),
-                time,
-                evt.velocity
-              );
-              Tone.Draw.schedule(() => {
-                this.store.dispatch("synth/noteOn", evt);
-              }, time);
-              Tone.Draw.schedule(() => {
-                this.store.dispatch("synth/noteOff", evt);
-              }, Tone.Time(Tone.Time(time).toTicks() + evt.duration * 192, "i"));
-            }, Tone.Time(evt.time * 192, "i"));
+    _.forIn(state.synth.sequence, (data, name) => {
+      this.synth.createChannel(name);
+      data.forEach(
+        (evt => {
+          this.processEvent(evt, name);
+        }).bind(this)
+      );
+    });
+  }
+  processEvent(evt, name) {
+    switch (evt.type) {
+      case "bpm":
+        transport.schedule(time => {
+          transport.bpm.value = evt.bpm;
+        }, Tone.Time(evt.time * 192, "i"));
+        break;
+      case "note":
+      case "pitch":
+        transport.schedule(time => {
+          this.synth.noteOnOff(
+            evt.interval,
+            Tone.Time(evt.duration * 192, "i"),
+            time,
+            evt.velocity,
+            name
+          );
+          Tone.Draw.schedule(() => {
+            this.store.dispatch("synth/noteOn", evt);
+          }, time);
+          Tone.Draw.schedule(() => {
+            this.store.dispatch("synth/noteOff", evt);
+          }, Tone.Time(Tone.Time(time).toTicks() + evt.duration * 192, "i"));
+        }, Tone.Time(evt.time * 192, "i"));
 
-            if (evt.time > 2) {
-              transport.schedule(time => {
-                Tone.Draw.schedule(() => {
-                  this.store.dispatch("synth/beforeNoteOn", evt);
-                }, time);
-              }, Tone.Time((evt.time - 2) * 192, "i"));
-            }
-
-            break;
+        if (evt.time > 2) {
+          transport.schedule(time => {
+            Tone.Draw.schedule(() => {
+              this.store.dispatch("synth/beforeNoteOn", evt);
+            }, time);
+          }, Tone.Time((evt.time - 2) * 192, "i"));
         }
-      }).bind(this)
-    );
+        break;
+    }
   }
 }
 
