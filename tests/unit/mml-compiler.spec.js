@@ -26,7 +26,6 @@ test("tie & set_length", () => {
   expect(compile("a L8 c2^.^")).toMatchObject({
     a: [
       {
-        id: 1,
         type: "note",
         interval: "c4",
         time: 0.0,
@@ -37,11 +36,14 @@ test("tie & set_length", () => {
   expect(compile("a L8 c2-.-")).toMatchObject({
     a: [
       {
-        id: 1,
-        type: "note",
-        interval: "c4",
-        time: 0.0,
         duration: 2.0 - 0.5 - 0.25 - 0.5
+      }
+    ]
+  });
+  expect(compile("a L4 c2.^-8")).toMatchObject({
+    a: [
+      {
+        duration: 2.0 + 1.0 + 1.0 - 0.5
       }
     ]
   });
