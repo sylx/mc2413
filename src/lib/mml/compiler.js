@@ -136,6 +136,9 @@ class MmlCompiler {
             break;
         }
       });
+      if (tie) {
+        length += track.length;
+      }
       if (length <= 0) {
         triggerError(`compile error: Invalid length`, node.start, node.end);
       }
