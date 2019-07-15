@@ -1,8 +1,5 @@
 import util from "util";
-import {
-  MmlParser as mml,
-  MmlCompiler as compile
-} from "../../src/lib/mml-parser";
+import { MmlParser as mml, MmlCompiler as compile } from "../../src/lib/mml";
 
 function dumpAST(text) {
   let r = mml.parse(text);

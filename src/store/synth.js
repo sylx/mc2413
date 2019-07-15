@@ -1,6 +1,4 @@
-import { MmlCompiler as compileMML } from "../lib/mml-parser";
-
-import MmlParser from "@/lib/mml-parser";
+import { MmlCompiler as compileMML } from "../lib/mml";
 import _ from "lodash";
 
 const testSeq = text => {
