@@ -1,9 +1,9 @@
 import P from "parsimmon";
 import _ from "lodash";
 
-//空白+:
-const space = P.regexp(/[ \t:\r\n]*/).node("empty");
-const space_exists = P.regexp(/[ \t:\r\n]+/).node("empty");
+//空白
+const space = P.regexp(/[ \t]*/).node("empty"); // "empty" nodes may be ignored..
+const space_exists = P.regexp(/[ \t]+/).node("empty");
 //数値
 const number = P.regexp(/\d+/).map(a => {
   return parseInt(a);
@@ -84,7 +84,7 @@ function isEmpty(x) {
   return x ? false : true;
 }
 
-const MmlParser = P.alt(
+const mml = P.alt(
   withLength,
   setLength,
   withAmount,
@@ -96,6 +96,28 @@ const MmlParser = P.alt(
   .many()
   .map(r => {
     return r.flat().filter(x => {
+      return !isEmpty(x);
+    });
+  });
+
+const track = P.seqMap(
+  P.regexp(/[a-z0-9]/i).many(),
+  space_exists,
+  mml,
+  (tr, sp, mml) => {
+    return {
+      target: tr.map(a => a.toLowerCase()),
+      mml: mml
+    };
+  }
+)
+  .node("track")
+  .desc("track");
+
+const MmlParser = P.alt(comment, track, space)
+  .sepBy(P.newline)
+  .map(r => {
+    return r.filter(x => {
       return !isEmpty(x);
     });
   });

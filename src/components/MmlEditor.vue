@@ -31,7 +31,9 @@ import CM from "codemirror";
 CM.defineMode("mml", () => {
   return {
     token(stream, state) {
-      if (stream.match(/[a-gr][+#-]*/i)) {
+      if (stream.match(/^[a-z0-9]+/) && stream.column() == 0) {
+        return "qualifier";
+      } else if (stream.match(/[a-gr][+#-]*/i)) {
         return "operator";
       } else if (stream.match(/[\d^.&]+/)) {
         return "number";
