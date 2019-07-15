@@ -138,10 +138,12 @@ class Sequencer {
         case "synth/playSequence":
           if (transport.state == "started") transport.stop(0);
           this.storeEvent(state);
+          Tone.context.latencyHint = "playback";
           transport.start();
           break;
         case "synth/stopSequence":
           transport.stop();
+          Tone.context.latencyHint = "interactive";
           break;
       }
     });
