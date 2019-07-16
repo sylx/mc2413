@@ -112,3 +112,29 @@ a c
     status: true
   });
 });
+
+test("loop", () => {
+  expect(mml.parse("a a[cde]4")).toMatchObject(
+    track("a", [
+      {},
+      { name: "loop_start" },
+      {},
+      {},
+      {},
+      { name: "loop_end", value: 4 }
+    ])
+  );
+  expect(mml.parse("a a[cde]f")).toMatchObject(
+    track("a", [
+      {},
+      { name: "loop_start" },
+      {},
+      {},
+      {},
+      { name: "loop_end", value: 2 },
+      {
+        value: "f"
+      }
+    ])
+  );
+});

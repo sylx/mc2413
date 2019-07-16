@@ -123,3 +123,60 @@ test("set_tempo", () => {
     ]
   });
 });
+
+test("loop", () => {
+  expect(compile("a o4l4[c]4d")).toMatchObject({
+    a: [
+      {
+        type: "note",
+        interval: "c4",
+        time: 0
+      },
+      {
+        type: "note",
+        interval: "c4"
+      },
+      {
+        type: "note",
+        interval: "c4"
+      },
+      {
+        type: "note",
+        interval: "c4"
+      },
+      {
+        type: "note",
+        interval: "d4",
+        time: 4
+      }
+    ]
+  });
+  expect(
+    compile(
+      `a o4l4 c [
+a d
+a ] e`
+    )
+  ).toMatchObject({
+    a: [
+      {
+        type: "note",
+        interval: "c4",
+        time: 0
+      },
+      {
+        type: "note",
+        interval: "d4"
+      },
+      {
+        type: "note",
+        interval: "d4"
+      },
+      {
+        type: "note",
+        interval: "e4",
+        time: 3
+      }
+    ]
+  });
+});

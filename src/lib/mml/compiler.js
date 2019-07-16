@@ -47,6 +47,12 @@ class TokenScanner {
     }
     triggerError(`compile error: Expected ${name}`, c.start, c.end);
   }
+  setIndex(index) {
+    this.index = index;
+  }
+  getIndex() {
+    return this.index;
+  }
 }
 
 class MmlCompiler {
@@ -170,10 +176,11 @@ class MmlCompiler {
 
     const scanner = new TokenScanner(token);
 
+    const loop_stack = [];
     while (scanner.hasNext()) {
       const s = scanner;
       const c = s.next();
-      let ln;
+      let ln, peek;
       switch (c.name) {
         case "interval":
           ln = s.match("length") ? calcLength(s.next()) : track.length;
@@ -220,6 +227,33 @@ class MmlCompiler {
             start: c.start,
             end: s.prev().end
           });
+          break;
+        case "loop_start":
+          loop_stack.push({
+            index: s.getIndex(),
+            count: null
+          });
+          break;
+        case "loop_end":
+          if (loop_stack.length == 0) {
+            triggerError(`compileError: missing "["`, c.start, c.end);
+          }
+          peek = loop_stack[loop_stack.length - 1];
+          if (peek.count === null) {
+            if (c.value === 0) {
+              //TODO
+              triggerError(
+                `compileError: not implemented infinite loop`,
+                c.start,
+                c.end
+              );
+            }
+            peek.count = c.value;
+          }
+          peek.count--;
+          if (peek.count > 0) {
+            s.setIndex(peek.index);
+          }
           break;
       }
     }

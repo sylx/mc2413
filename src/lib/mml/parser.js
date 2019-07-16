@@ -1,6 +1,15 @@
 import P from "parsimmon";
 import _ from "lodash";
 
+function isEmpty(x) {
+  if (x.name && x.name == "empty") return true;
+  if (x.value) {
+    let v = x.value;
+    if (v.hasOwnProperty("length") && v.length == 0) return true;
+  }
+  return x ? false : true;
+}
+
 //空白
 const space = P.regexp(/[ \t]*/).node("empty"); // "empty" nodes may be ignored..
 const space_exists = P.regexp(/[ \t]+/).node("empty");
@@ -75,20 +84,19 @@ const command = P.alt(
 
 const comment = P.seqMap(P.string("//"), P.regexp(/.*/), (a, b) => "");
 
-function isEmpty(x) {
-  if (x.name && x.name == "empty") return true;
-  if (x.value) {
-    let v = x.value;
-    if (v.hasOwnProperty("length") && v.length == 0) return true;
-  }
-  return x ? false : true;
-}
+const loop_start = P.string("[").node("loop_start");
+const loop_end = P.seqMap(P.string("]"), number.or(empty), (cl, count) => {
+  if (count.name == "empty") return 2;
+  return count;
+}).node("loop_end");
 
 const mml = P.alt(
   withLength,
   setLength,
   withAmount,
   command,
+  loop_start,
+  loop_end,
   comment,
   space_exists
 )
@@ -99,6 +107,21 @@ const mml = P.alt(
       return !isEmpty(x);
     });
   });
+
+const loop = P.seqMap(
+  P.string("["),
+  mml,
+  P.string("]"),
+  number,
+  (s, mml, e, count) => {
+    return {
+      count: parseInt(count),
+      mml: mml
+    };
+  }
+).node("loop");
+
+const mmlAndLoop = P.alt(mml, loop);
 
 const track = P.seqMap(
   P.regexp(/[a-z0-9]/i).many(),
