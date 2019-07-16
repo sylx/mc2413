@@ -69,7 +69,11 @@ export default {
       if (action.type == "synth/tickSequence") {
         const time = action.payload;
         let x = this.getXfromTime(time);
-        this.setStagePos(x > 0 ? x : 0, this.stage_pos.y);
+        this.cursorX = x;
+        const cx = this.stage_width / 2;
+        if (x > this.stage_pos.x + cx || x < this.stage_pos.x) {
+          this.setStagePos(x - cx, this.stage_pos.y);
+        }
       }
       if (action.type == "synth/beforeNoteOn") {
         const note = action.payload;
@@ -88,7 +92,11 @@ export default {
         let note = null,
           last = { line: 1, column: 1 };
         this.note.some(n => {
-          if (n.start.line >= pos.line && n.end.column > pos.column) {
+          if (
+            n.start.line == pos.line &&
+            n.start.column <= pos.column &&
+            n.end.column > pos.column
+          ) {
             note = n;
             return true;
           }
@@ -284,6 +292,8 @@ export default {
         this.$set(this.selection, "selected", false);
       }
       this.$set(note, "selected", true);
+      this.setCenterInterval(note.interval, note.time);
+      this.cursorX = this.getXfromTime(note.time);
       this.selection = note;
       this.$store.dispatch("synth/selectNote", note);
     },

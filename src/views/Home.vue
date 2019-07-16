@@ -35,9 +35,7 @@
     <b-row class="mb-2 tranport">
       <b-col sm="12">
         <b-button-group size="sm">
-          <b-button variant="success" @click="playTransport" id="start-context"
-            >Play</b-button
-          >
+          <b-button variant="success" @click="playTransport">Play</b-button>
           <b-button @click="stopTransport">Stop</b-button>
           <b-button disabled>
             <b-spinner small type="grow" v-if="transportPlaying"></b-spinner>
@@ -62,6 +60,9 @@
   }
   .piano-roll {
     height: 350px;
+  }
+  .tranport button {
+    min-width: 6em;
   }
 }
 </style>

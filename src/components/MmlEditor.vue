@@ -108,16 +108,16 @@ export default {
           break;
         case "synth/selectNote":
         case "synth/noteOn":
-          if (action.type == "synth/selectNote") this.selections = {};
           this.changeCursorByProc = true;
           start = new CM.Pos(note.start.line - 1, note.start.column - 1);
           end = new CM.Pos(note.end.line - 1, note.end.column - 1);
 
-          this.selections[note.tr] = { anchor: start, head: end };
-          cm.getDoc().setSelections(_.values(this.selections));
           if (action.type == "synth/selectNote") {
             cm.focus();
             cm.setCursor(start);
+          } else {
+            this.selections[note.tr] = { anchor: start, head: end };
+            cm.getDoc().setSelections(_.values(this.selections));
           }
           break;
         case "synth/noteOff":
