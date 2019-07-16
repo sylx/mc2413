@@ -75,6 +75,7 @@ class MmlCompiler {
     this.tracks[name] = _.merge(
       {
         time: 0,
+        token: [],
         data: [],
         name
       },
@@ -107,13 +108,17 @@ class MmlCompiler {
         n.value.target.forEach(name => {
           let track = this.getTrack(name);
           if (!track) track = this.createTrack(name);
-          this.compileMml(track, n.value.mml);
+          track.token = _.concat(track.token, n.value.mml);
         });
       }
     });
+    _.forIn(this.tracks, (track, name) => {
+      this.compileMml(track);
+    });
     return this.getData();
   }
-  compileMml(track, token) {
+  compileMml(track) {
+    const token = track.token;
     let is_slur = false;
     const calcDuration = (length, quantize) => {
       return length * quantize;

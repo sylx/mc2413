@@ -18,8 +18,7 @@ abc DFE8C8<B8G8>C<G>GED<G>DFE8C8R4RGEGCE<GBA8>C8E8G8
 abc F+ADF+<A>D<F+AG8B8>D8F+8EGCE<G>C<EGF+8A8B8>D+8RECE<A>
 abc CEGF+D<B>D<GB>DF+EC<A>C<F+A>C8.<B>C<AB8<B8>E>E<BGE<BGBE2`;
 
-initialMML = `
-// FF3 Theme
+initialMML = `// FF3 Theme
 
 // Intro
 
@@ -50,7 +49,7 @@ a o4L4v15
 b o3L4v11
 c o3L2v13
 
-// abc [
+abc [
 
 a b>ef+<b> a2g+f+ ed+8e8f+ee2d+2 c+f+g+c+ b2ag+ f+f8g+8f+c+ g+2f+2<
 b b2.>c+8d+8ec+d+f+ c+d+8e8f+g+8a+8 bf+d+<b> f+2ff+8g+8 af+fb a2a+2 b2a2<
@@ -76,7 +75,7 @@ c br>babrgr f+r>c+r<ar<ab> cr>cr<ef+g4 f+4d+4<b4a4>
 b L4
 c L2
 
-// abc ]0
+abc ]
 `;
 
 export default {
