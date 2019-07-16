@@ -179,4 +179,44 @@ a ] e`
       }
     ]
   });
+  expect(compile("a o4l4 [c [d] e]")).toMatchObject({
+    a: [
+      {
+        type: "note",
+        interval: "c4",
+        time: 0
+      },
+      {
+        type: "note",
+        interval: "d4"
+      },
+      {
+        type: "note",
+        interval: "d4"
+      },
+      {
+        type: "note",
+        interval: "e4",
+        time: 3
+      },
+      {
+        type: "note",
+        interval: "c4",
+        time: 4
+      },
+      {
+        type: "note",
+        interval: "d4"
+      },
+      {
+        type: "note",
+        interval: "d4"
+      },
+      {
+        type: "note",
+        interval: "e4",
+        time: 7
+      }
+    ]
+  });
 });

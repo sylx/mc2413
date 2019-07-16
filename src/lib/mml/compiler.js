@@ -258,6 +258,8 @@ class MmlCompiler {
           peek.count--;
           if (peek.count > 0) {
             s.setIndex(peek.index);
+          } else {
+            loop_stack.pop();
           }
           break;
       }
