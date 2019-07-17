@@ -99,7 +99,7 @@ class MmlCompiler {
         },
         {
           line: ast.index.line,
-          column: src.split(/\n/)[ast.index.line].length
+          column: src.split(/\n/)[ast.index.line - 1].length + 1
         }
       );
     }
