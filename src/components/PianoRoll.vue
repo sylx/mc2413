@@ -33,7 +33,11 @@
           </g>
         </pattern>
       </defs>
-      <g :transform="getTransform(0, stage_pos.y * -1, scale)" ref="stage">
+      <g
+        :transform="getTransform(0, stage_pos.y * -1, scale)"
+        ref="stage"
+        class="trans"
+      >
         <rect
           x="32"
           :width="stage_width"
@@ -43,8 +47,12 @@
           @mouseup="onDrag('end', $event)"
           @mousemove="onDrag('move', $event)"
           @wheel.prevent="onDrag('wheel', $event)"
-        ></rect>
-        <g id="note" :transform="getTransform(stage_pos.x * -1, 0)" ref="note">
+        />
+        <g
+          class="note-container"
+          :transform="getTransform(stage_pos.x * -1, 0)"
+          ref="note"
+        >
           <g
             v-for="n in note"
             :key="n.id"
@@ -168,7 +176,7 @@ svg {
       pointer-events: none;
     }
   }
-  #note {
+  .note-container {
     .note {
       /*       fill: #855181; */
       /*       stroke: #422f40; */

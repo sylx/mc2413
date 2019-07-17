@@ -65,7 +65,6 @@ export default {
     );
 
     this.$store.subscribeAction((action, state) => {
-      let timer = null;
       if (action.type == "synth/tickSequence") {
         const time = action.payload;
         let x = this.getXfromTime(time);
@@ -147,6 +146,7 @@ export default {
             x: e.offsetX,
             y: e.offsetY
           };
+          this.$refs.stage.classList.remove("trans");
           break;
         case "move":
           if (!e.buttons) this.last_pos = null;
@@ -163,6 +163,7 @@ export default {
           break;
         case "end":
           this.last_pos = null;
+          this.$refs.stage.classList.add("trans");
           break;
         case "wheel":
           this.setStagePos(
@@ -308,8 +309,6 @@ export default {
       if (y > this.stage_pos.y + this.$refs.wrapper.offsetHeight) ydir = "down";
 
       if (ydir || x != this.stage_pos.x) {
-        if (this.timer) clearTimeout(this.timer);
-        this.$refs.stage.classList.add("trans");
         this.setStagePos(
           time ? x : this.stage_pos.x,
           ydir
@@ -318,9 +317,6 @@ export default {
               : y - this.$refs.wrapper.offsetHeight
             : this.stage_pos.y
         );
-        this.timer = _.delay(() => {
-          this.$refs.stage.classList.remove("trans");
-        }, 500);
       }
     }
   }

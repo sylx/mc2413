@@ -2,9 +2,9 @@
   <div class="home">
     <b-row class="mb-2 pianoroll-control">
       <b-col sm="2">
-        <b-button disabled class="float-left">
-          scale:{{ Number(pianoroll_scale).toFixed(2) }}
-        </b-button>
+        <b-button disabled class="float-left"
+          >scale:{{ Number(pianoroll_scale).toFixed(2) }}</b-button
+        >
       </b-col>
       <b-col sm="6">
         <b-form-input
@@ -22,8 +22,8 @@
             v-for="o in pianoroll_quantize_options"
             :key="o"
             @click="pianoroll_quantize = o"
-            >{{ o }}
-          </b-dropdown-item>
+            >{{ o }}</b-dropdown-item
+          >
         </b-dropdown>
       </b-col>
     </b-row>
