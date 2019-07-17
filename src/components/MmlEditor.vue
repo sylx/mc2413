@@ -1,9 +1,9 @@
 <template>
   <div>
     <codemirror ref="cm" :value="mml" :options="cmOptions" />
-    <b-alert class="mt-4" v-if="mmlError" show variant="danger">{{
-      mmlError.message
-    }}</b-alert>
+    <b-alert class="mt-4" v-if="mmlError" show variant="danger">
+      {{ mmlError.message }}
+    </b-alert>
   </div>
 </template>
 
@@ -20,7 +20,7 @@ import _ from "lodash";
 import { codemirror } from "vue-codemirror";
 import "codemirror/lib/codemirror.css";
 //import "codemirror/theme/base16-dark.css";
-import "../assets/mid-school2.less";
+import "../assets/scss/mmleditor-theme.scss";
 
 import "codemirror/addon/selection/active-line.js";
 import "codemirror/addon/selection/mark-selection.js";
@@ -71,7 +71,7 @@ export default {
     return {
       cmOptions: {
         mode: "mml",
-        theme: "mid-school2",
+        theme: "mmleditor",
         lineNumbers: true,
         line: true,
         lineWrapping: true,

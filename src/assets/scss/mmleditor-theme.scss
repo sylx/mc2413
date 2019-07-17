@@ -1,0 +1,119 @@
+@mixin keyframes($animation-name) {
+  @-webkit-keyframes #{$animation-name} {
+    @content;
+  }
+  @-moz-keyframes #{$animation-name} {
+    @content;
+  }
+  @keyframes #{$animation-name} {
+    @content;
+  }
+}
+
+@mixin animation-glow-flush($color) {
+  $color0: lighten($color, 30%);
+  $color1: adjust-hue($color, 28deg);
+  $color2: adjust-hue($color, 20deg);
+  $color3: adjust-hue($color, 8deg);
+  $color4: adjust-hue($color, -8deg);
+  $color5: adjust-hue($color, -12deg);
+
+  text-shadow: 0 -0.05em 0.2em $color0, 0.01em -0.02em 0.15em $color1,
+    0.01em -0.05em 0.15em $color2, 0.02em -0.15em 0.2em $color3,
+    0.04em -0.2em 0.3em $color, 0.05em -0.25em 0.4em $color,
+    0.06em -0.2em 0.9em $color4, 0.1em -0.1em 1em $color5;
+}
+
+@mixin animation-glow-none($color) {
+  $color0: lighten($color, 30%);
+  $color1: adjust-hue($color, 28deg);
+  $color2: adjust-hue($color, 20deg);
+  $color3: adjust-hue($color, 8deg);
+  $color4: adjust-hue($color, -8deg);
+  $color5: adjust-hue($color, -12deg);
+
+  text-shadow: 0 0 0 $color0, 0 0 0 $color1, 0 0 0 $color2, 0 0 0 $color3,
+    0 0 0 $color, 0 0 0 $color, 0 0 0 $color4, 0 0 0 $color5;
+}
+
+@mixin animation($animation-name, $option, $color) {
+  @include keyframes($animation-name) {
+    0% {
+      @include animation-glow-flush($color);
+    }
+    100% {
+      @include animation-glow-none($color);
+    }
+  }
+  -webkit-animation: $animation-name $option;
+  -moz-animation: $animation-name $option;
+  animation: $animation-name $option;
+}
+
+@mixin chunk($name, $color) {
+  span.#{$name} {
+    color: $color;
+    &.CodeMirror-selectedtext,
+    &.flush {
+      @include animation(fr-#{$name}, 1s 1 linear alternate, $color);
+    }
+  }
+}
+
+.cm-s-mmleditor {
+  &.CodeMirror {
+    font-family: pixel !important;
+    line-height: 120% !important;
+    font-size: 24px;
+
+    background: #0a001f;
+    color: #bcb7c9;
+  }
+
+  .CodeMirror-cursor {
+    border-left: 0.1em solid white !important;
+  }
+
+  .CodeMirror-selected {
+    background: #27007a !important;
+  }
+  .CodeMirror-gutters {
+    background: #0a001f;
+    border-right: 1px solid #aaa;
+  }
+  .CodeMirror-linenumber {
+    color: #ccc;
+  }
+  .CodeMirror-activeline-background {
+    background: #27282e !important;
+  }
+  .CodeMirror-matchingbracket {
+    outline: 1px solid grey;
+    color: white !important;
+  }
+  .CodeMirror-lint-mark-error {
+    text-decoration: #f00 underline;
+    @include animation(mark-error, 1s infinite linear alternate, #f00);
+    background: none;
+  }
+
+  @include chunk(cm-keyword, #ffbd40);
+  @include chunk(cm-property, #ffbd40);
+  @include chunk(cm-atom, #6c8cd5);
+  @include chunk(cm-number, lighten(#164, 20%));
+  @include chunk(cm-def, #fff);
+  @include chunk(cm-operator, #fff);
+  @include chunk(cm-variable, #ff3);
+  @include chunk(cm-variable-2, #ee3);
+  @include chunk(cm-variable-3, #dd3);
+  @include chunk(cm-comment, #999);
+  @include chunk(cm-string, #9fee00);
+  @include chunk(cm-string-2, #9fee00);
+  @include chunk(cm-meta, #ff0);
+  @include chunk(cm-qualifier, #fff700);
+  @include chunk(cm-builtin, lighten(#30a, 50%));
+  @include chunk(cm-bracket, #cc7);
+  @include chunk(cm-tag, #ffbd40);
+  @include chunk(cm-attribute, #fff700);
+  @include chunk(cm-error, #f00);
+}
