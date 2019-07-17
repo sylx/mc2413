@@ -82,7 +82,7 @@ const command = P.alt(
   P.string("<").node("octave_shift")
 );
 
-const comment = P.seqMap(P.string("//"), P.regexp(/.*/), (a, b) => "");
+const comment = P.seqMap(P.regexp(/\s*\/\//), P.regexp(/.*/), (a, b) => "");
 
 const loop_start = P.string("[").node("loop_start");
 const loop_end = P.seqMap(P.string("]"), number.or(empty), (cl, count) => {
@@ -124,12 +124,12 @@ const loop = P.seqMap(
 const mmlAndLoop = P.alt(mml, loop);
 
 const track = P.seqMap(
-  P.regexp(/[a-z0-9]/i).many(),
+  P.regexp(/\s*[a-z0-9]+/i),
   space_exists,
   mml,
   (tr, sp, mml) => {
     return {
-      target: tr.map(a => a.toLowerCase()),
+      target: _.filter(tr.split("").map(a => _.trim(a).toLowerCase())),
       mml: mml
     };
   }

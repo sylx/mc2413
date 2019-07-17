@@ -40,6 +40,23 @@ test("track", () => {
       }
     ]
   });
+  expect(mml.parse(" a c")).toMatchObject({
+    status: true,
+    value: [
+      {
+        name: "track",
+        value: {
+          target: ["a"],
+          mml: [
+            {
+              name: "interval",
+              value: "c"
+            }
+          ]
+        }
+      }
+    ]
+  });
   expect(mml.parse("ABC cde")).toMatchObject(
     track("abc", [
       {
@@ -98,6 +115,7 @@ test("length", () => {
 
 test("comment", () => {
   expect(mml.parse("// comment")).toMatchObject({ status: true });
+  expect(mml.parse(" // comment")).toMatchObject({ status: true });
   expect(mml.parse("a cde // comment")).toMatchObject({
     status: true
   });
