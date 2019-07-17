@@ -47,6 +47,13 @@ test("tie & set_length", () => {
       }
     ]
   });
+  expect(compile("a L4 c^")).toMatchObject({
+    a: [
+      {
+        duration: 1.0 + 1.0
+      }
+    ]
+  });
 });
 test("octave", () => {
   expect(compile("a o5>a4")).toMatchObject({
