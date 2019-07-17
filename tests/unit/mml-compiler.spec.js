@@ -219,4 +219,34 @@ a ] e`
       }
     ]
   });
+  expect(compile("a o4l4 d [c [d] e2]0")).toMatchObject({
+    a: [
+      {},
+      {
+        type: "note",
+        interval: "c4",
+        time: 1
+      },
+      {
+        type: "note",
+        interval: "d4"
+      },
+      {
+        type: "note",
+        interval: "d4"
+      },
+      {
+        type: "note",
+        interval: "e4",
+        time: 4
+      },
+      {
+        type: "runtime_loop",
+        count: 0,
+        time: 1,
+        start: 1,
+        end: 6
+      }
+    ]
+  });
 });

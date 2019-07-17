@@ -236,7 +236,8 @@ class MmlCompiler {
         case "loop_start":
           loop_stack.push({
             index: s.getIndex(),
-            count: null
+            count: null,
+            time: track.time
           });
           break;
         case "loop_end":
@@ -246,12 +247,13 @@ class MmlCompiler {
           peek = loop_stack[loop_stack.length - 1];
           if (peek.count === null) {
             if (c.value === 0) {
-              //TODO
-              triggerError(
-                `compileError: not implemented infinite loop`,
-                c.start,
-                c.end
-              );
+              push({
+                type: "runtime_loop",
+                count: c.value,
+                time: peek.time,
+                start: peek.time,
+                end: track.time
+              });
             }
             peek.count = c.value;
           }

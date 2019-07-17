@@ -75,8 +75,12 @@ c br>babrgr f+r>c+r<ar<ab> cr>cr<ef+g4 f+4d+4<b4a4>
 b L4
 c L2
 
-abc ]
+abc ]0
 `;
+
+// initialMML = `
+// a L8 cdefgab>[cdefgab>c<bagfed]0
+// `;
 
 export default {
   namespaced: true,
