@@ -188,7 +188,6 @@ class Sequencer {
       .forEach(evt => {
         part.loop = evt.count === 0 ? true : evt.count;
         transport.schedule(time => {
-          console.log("loop_set");
           part.loopStart = _beats(evt.start);
           part.loopEnd = _beats(evt.end);
         }, _beats(evt.time, 1)); //noteと同じタイミングだとnoteがスキップされるので、ずらす
@@ -209,7 +208,6 @@ class Sequencer {
     switch (evt.type) {
       case "note":
       case "pitch":
-        console.log("note", evt.interval);
         this.synth.noteOnOff(
           evt.interval,
           _beats(evt.duration),
