@@ -116,8 +116,11 @@ class Synth {
     let n = interval.toUpperCase().match(/([A-G][#+-]*)(\d+)/);
     if (!n) return "";
     let name = n[1];
+    let octave = n[2];
     if (trans[n[1]]) name = trans[n[1]];
-    return name + n[2];
+    if (n[1] == "C-") octave--;
+    if (n[1] == "B+") octave++;
+    return name + octave;
   }
 }
 
