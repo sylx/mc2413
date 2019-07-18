@@ -10,7 +10,7 @@ function dumpSEQ(text) {
 }
 
 test("time & length", () => {
-  expect(compile("a r2a8.^32-32")).toMatchObject({
+  expect(compile("a l4 r2a8.^32-32")).toMatchObject({
     a: [
       {
         id: 1,

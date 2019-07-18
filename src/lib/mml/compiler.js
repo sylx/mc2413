@@ -127,41 +127,41 @@ class MmlCompiler {
       const len = node.value;
       let length = 0,
         last_ln = null,
-        is_tie = false,
         tie = 1;
-      len.forEach(ln => {
-        if (is_tie && !String(ln).match(/^\d+$/)) {
-          last_ln = track.length;
-          length += last_ln * tie;
-        }
+      len.forEach((ln, i) => {
         switch (ln) {
           case 0:
             break;
           case "+":
           case "^":
-            tie = 1;
-            is_tie = true;
-            break;
           case "\\":
           case "-":
-            tie = -1;
-            is_tie = true;
+            if (last_ln === null) {
+              length += track.length * tie;
+              last_ln = track.length;
+            } else {
+              last_ln = null;
+            }
+            tie = ln == "+" || ln == "^" ? 1 : -1;
+            if (i == len.length - 1) {
+              length += track.length * tie;
+            }
             break;
           case ".":
+            if (last_ln === null) {
+              length += track.length * tie;
+              last_ln = track.length;
+            }
             last_ln = last_ln / 2;
             length += last_ln * tie;
-            is_tie = false;
             break;
           default:
             last_ln = 4 / ln;
             length += last_ln * tie;
-            is_tie = false;
             break;
         }
+        //        console.log(len, ln, length);
       });
-      if (is_tie) {
-        length += track.length * tie;
-      }
       if (length <= 0) {
         triggerError(`compile error: Invalid length`, node.start, node.end);
       }
