@@ -155,10 +155,13 @@ class Sequencer {
     this.indicator = new Tone.Loop(
       (time => {
         Tone.Draw.schedule(() => {
-          this.store.dispatch(
-            "synth/tickSequence",
-            Tone.Time(transport.position).toTicks() / 192
-          );
+          const time =
+            Tone.Time(transport.position).toTicks() / 192 -
+            Tone.Time(
+              Tone.context.lookAhead + Tone.context.baseLatency
+            ).toTicks() /
+              192;
+          this.store.dispatch("synth/tickSequence", time > 0 ? time : 0);
         }, time);
       }).bind(this),
       0.05
