@@ -6,10 +6,6 @@ const compileMML = src => compiler.compile(src);
 
 let initialMML = sample;
 
-initialMML = `
-a L8 cdefgab>[cdefgab>c<bagfed]0
-`;
-
 export default {
   namespaced: true,
   state: {

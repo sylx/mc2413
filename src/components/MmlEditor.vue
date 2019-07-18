@@ -104,6 +104,8 @@ export default {
       let start, end;
       switch (action.type) {
         case "synth/playSequence":
+        case "synth/stopSequence":
+          _.forIn(this.selections, mark => mark.clear());
           this.selections = {};
           break;
         case "synth/selectNote":
@@ -115,13 +117,18 @@ export default {
           if (action.type == "synth/selectNote") {
             cm.focus();
             cm.setCursor(start);
-          } else {
-            this.selections[note.tr] = { anchor: start, head: end };
-            cm.getDoc().setSelections(_.values(this.selections));
           }
+          if (this.selections[note.tr]) {
+            this.selections[note.tr].clear();
+          }
+          this.selections[note.tr] = cm.markText(start, end, {
+            className: "flush"
+          });
           break;
         case "synth/noteOff":
-          delete this.selections[note.tr];
+          if (this.selections[note.tr]) {
+            this.selections[note.tr].clear();
+          }
           break;
       }
     });
