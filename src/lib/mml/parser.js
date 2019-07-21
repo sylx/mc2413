@@ -85,6 +85,7 @@ const command = P.alt(
 const comment = P.seqMap(P.regexp(/\s*\/\//), P.regexp(/.*/), (a, b) => "");
 
 const loop_start = P.string("[").node("loop_start");
+const loop_branch = P.string("|").node("loop_branch");
 const loop_end = P.seqMap(P.string("]"), number.or(empty), (cl, count) => {
   if (count.name == "empty") return 2;
   return count;
@@ -96,6 +97,7 @@ const mml = P.alt(
   withAmount,
   command,
   loop_start,
+  loop_branch,
   loop_end,
   comment,
   space_exists
@@ -107,21 +109,6 @@ const mml = P.alt(
       return !isEmpty(x);
     });
   });
-
-const loop = P.seqMap(
-  P.string("["),
-  mml,
-  P.string("]"),
-  number,
-  (s, mml, e, count) => {
-    return {
-      count: parseInt(count),
-      mml: mml
-    };
-  }
-).node("loop");
-
-const mmlAndLoop = P.alt(mml, loop);
 
 const track = P.seqMap(
   P.regexp(/\s*[a-z0-9]+/i),

@@ -226,6 +226,28 @@ a ] e`
       }
     ]
   });
+  expect(compile("a o4l4 [c|d]2 e")).toMatchObject({
+    a: [
+      {
+        type: "note",
+        interval: "c4",
+        time: 0
+      },
+      {
+        interval: "d4",
+        time: 1
+      },
+      {
+        interval: "c4",
+        time: 2
+      },
+      {
+        interval: "e4",
+        time: 3
+      }
+    ]
+  });
+
   expect(compile("a o4l4 d [c [d] e2]0")).toMatchObject({
     a: [
       {},

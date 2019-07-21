@@ -240,6 +240,13 @@ class MmlCompiler {
             time: track.time
           });
           break;
+        case "loop_branch":
+          peek = loop_stack[loop_stack.length - 1];
+          if (peek.count === 1) {
+            loop_stack.pop();
+            s.setIndex(peek.endIndex);
+          }
+          break;
         case "loop_end":
           if (loop_stack.length == 0) {
             triggerError(`compileError: missing "["`, c.start, c.end);
@@ -256,6 +263,7 @@ class MmlCompiler {
               });
             }
             peek.count = c.value;
+            peek.endIndex = s.getIndex();
           }
           peek.count--;
           if (peek.count > 0) {

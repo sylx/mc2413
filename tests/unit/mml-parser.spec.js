@@ -142,12 +142,13 @@ test("loop", () => {
       { name: "loop_end", value: 4 }
     ])
   );
-  expect(mml.parse("a a[cde]f")).toMatchObject(
+  expect(mml.parse("a a[cd|e]f")).toMatchObject(
     track("a", [
       {},
       { name: "loop_start" },
       {},
       {},
+      { name: "loop_branch" },
       {},
       { name: "loop_end", value: 2 },
       {
