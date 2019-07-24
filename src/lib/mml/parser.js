@@ -11,8 +11,8 @@ function isEmpty(x) {
 }
 
 //空白
-const space = P.regexp(/[ \t]*/).node("empty"); // "empty" nodes may be ignored..
-const space_exists = P.regexp(/[ \t]+/).node("empty");
+const optWhitespace = P.regexp(/[ \t]*/).node("empty"); // "empty" nodes may be ignored..
+const whitespace = P.regexp(/[ \t]+/).node("empty");
 //数値
 const number = P.regexp(/\d+/).map(a => {
   return parseInt(a);
@@ -44,8 +44,8 @@ const slur = P.string("&").node("slur");
 //音長のあるもの(省略可)
 const withLength = P.seq(
   P.alt(interval, rest),
-  length.or(empty).skip(space), //optional
-  slur.or(empty).skip(space) //optional
+  length.or(empty).skip(optWhitespace), //optional
+  slur.or(empty).skip(optWhitespace) //optional
 );
 
 // ex)L8 L4. L4&16
@@ -82,7 +82,9 @@ const command = P.alt(
   P.string("<").node("octave_shift")
 );
 
-const comment = P.seqMap(P.regexp(/\s*\/\//), P.regexp(/.*/), (a, b) => "");
+const comment = P.seqMap(P.string("//"), P.regexp(/.*/), (a, b) => "").trim(
+  optWhitespace
+);
 
 const loop_start = P.string("[").node("loop_start");
 const loop_branch = P.string("|").node("loop_branch");
@@ -99,10 +101,9 @@ const mml = P.alt(
   loop_start,
   loop_branch,
   loop_end,
-  comment,
-  space_exists
+  comment
 )
-  .skip(space)
+  .skip(optWhitespace)
   .many()
   .map(r => {
     return r.flat().filter(x => {
@@ -111,8 +112,8 @@ const mml = P.alt(
   });
 
 const track = P.seqMap(
-  P.regexp(/\s*[a-z0-9]+/i),
-  space_exists,
+  P.regexp(/[a-z0-9]+/i),
+  whitespace,
   mml,
   (tr, sp, mml) => {
     return {
@@ -121,10 +122,11 @@ const track = P.seqMap(
     };
   }
 )
+  .trim(optWhitespace)
   .node("track")
   .desc("track");
 
-const MmlParser = P.alt(comment, track, space)
+const MmlParser = P.alt(comment, track, optWhitespace)
   .sepBy(P.newline)
   .map(r => {
     return r.filter(x => {

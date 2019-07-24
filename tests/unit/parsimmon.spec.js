@@ -1,4 +1,12 @@
 import P from "parsimmon";
+import util from "util";
+import _ from "lodash";
+
+function dumpAST(p, text) {
+  let r = p.parse(text);
+  console.log(util.inspect(r, false, null, true));
+  return r;
+}
 
 test("combi", () => {
   const lang = P.createLanguage({
@@ -102,5 +110,83 @@ test("error", () => {
   ).toMatchObject({
     status: false,
     expected: ["keyword_hoge"]
+  });
+});
+
+test("sepBy", () => {
+  const identifier = P.regexp(/[a-z0-9_-]+/i).map(x => x.toLowerCase());
+  const number = P.regexp(/[0-9]+/).map(x => parseInt(x));
+  const interpretEscape = str => {
+    const escapes = {
+      b: "\b",
+      f: "\f",
+      n: "\n",
+      r: "\r",
+      t: "\t"
+    };
+    return str.replace(/\\(u[0-9a-fA-F]{4}|[^u])/, (_, escape) => {
+      let type = escape.charAt(0);
+      let hex = escape.slice(1);
+      if (type === "u") {
+        return String.fromCharCode(parseInt(hex, 16));
+      }
+      if (escapes.hasOwnProperty(type)) {
+        return escapes[type];
+      }
+      return type;
+    });
+  };
+  const string = P.regexp(/"((?:\\.|.)*?)"/, 1)
+    .map(interpretEscape)
+    .desc("string");
+
+  const param = P.seqMap(
+    identifier.map(x => x.toLowerCase()).skip(P.optWhitespace),
+    P.string(":").skip(P.optWhitespace),
+    P.alt(number, string)
+      .trim(P.optWhitespace)
+      .node("defineParamValue")
+      .sepBy(P.string(",")),
+    (ident, colon, values) => [ident, values]
+  ).trim(P.optWhitespace);
+  const defineParams = P.seqMap(
+    P.string("@"),
+    identifier.trim(P.optWhitespace),
+    P.string("{"),
+    param.many(),
+    P.string("}"),
+    (s, name, o, params, c) => {
+      return {
+        identifier: name,
+        params: _.zipObject(params.map(x => x[0]), params.map(x => x[1]))
+      };
+    }
+  )
+    .trim(P.optWhitespace)
+    .node("defineParam");
+
+  expect(param.parse(' HOGE : 1 , 2,"moe",4')).toMatchObject({
+    status: true
+    //    value: ["hoge", [1, 2, "moe", 4]]
+  });
+  expect(
+    defineParams.parse(
+      `@V01 {
+PARAM1: 1,2,3
+PA_RAM2: "string\\""
+}`
+    )
+  ).toMatchObject({
+    status: true,
+    value: {
+      name: "defineParam",
+      value: {
+        identifier: "v01",
+        params: {
+          param1: [{ value: 1 }, { value: 2 }, { value: 3 }],
+          pa_ram2: [{ value: 'string"' }]
+        }
+      }
+    }
   });
 });
