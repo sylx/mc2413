@@ -31,16 +31,45 @@ import CM from "codemirror";
 
 CM.defineMode("mml", () => {
   return {
+    startState: function(basecolumn) {
+      console.log("startState", arguments);
+      return {
+        ctx: null
+      };
+    },
     token(stream, state) {
-      if (stream.column() == 0 && stream.match(/^\s*[a-z0-9]+/)) {
-        return "qualifier";
-      } else if (stream.match(/[a-gr][+#-]*/i)) {
-        return "operator";
-      } else if (stream.match(/[\d^.&]+/)) {
-        return "number";
-      } else if (stream.match(/[><tlvqo]/i)) {
-        return "keyword";
-      } else if (stream.match(/\/\/.*/)) {
+      if (stream.column() == 0) {
+        if (stream.match(/^\s*[a-z0-9]+/)) {
+          state.ctx = "track";
+          return "qualifier";
+        }
+        if (stream.match(/^\s*@.+\s+/)) {
+          state.ctx = "define_tone";
+          return "variable";
+        }
+      }
+      if (state.ctx == "define_tone") {
+        if (stream.match(/".+?"/)) {
+          return "string";
+        }
+        if (stream.match(/{/)) {
+          return "bracket";
+        }
+        if (stream.match(/}/)) {
+          state.ctx = null;
+          return "bracket";
+        }
+      } else if (state.ctx == "track") {
+        if (stream.match(/[a-gr][+#-]*/i)) {
+          return "operator";
+        } else if (stream.match(/[\d^.&]+/)) {
+          return "number";
+        } else if (stream.match(/[><tlvqo]/i)) {
+          return "keyword";
+        }
+      }
+
+      if (stream.match(/\/\/.*/)) {
         return "comment";
       } else {
         stream.next();

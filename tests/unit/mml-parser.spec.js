@@ -73,7 +73,7 @@ test("track", () => {
       }
     ])
   );
-  expect(mml.parse("123 cde")).toMatchObject({ status: true });
+  expect(mml.parse(" 23 cde")).toMatchObject({ status: true });
   expect(mml.parse("_ cde")).toMatchObject({ status: false });
   expect(mml.parse("8c\ncde")).toMatchObject({ status: false });
 });
@@ -114,9 +114,12 @@ test("length", () => {
 });
 
 test("comment", () => {
-  expect(mml.parse("// comment")).toMatchObject({ status: true });
+  expect(mml.parse("// comment")).toMatchObject({ status: true, value: [] });
   expect(mml.parse(" // comment")).toMatchObject({ status: true });
   expect(mml.parse("a cde // comment")).toMatchObject({
+    status: true
+  });
+  expect(mml.parse("//line1\n//line2")).toMatchObject({
     status: true
   });
 });
@@ -156,4 +159,74 @@ test("loop", () => {
       }
     ])
   );
+});
+
+test("defineTone", () => {
+  expect(
+    mml.parse(`@v01 nes {
+PARAM1: 1,"b",3
+ PARAM2 : "a",,""
+}
+a a8.
+`)
+  ).toMatchObject({
+    status: true,
+    value: [
+      {
+        name: "define_tone",
+        value: {
+          name: "v01",
+          type: "nes",
+          params: {
+            param1: [{ value: 1 }, { value: "b" }, { value: 3 }],
+            param2: [{ value: "a" }, { value: "" }, { value: "" }]
+          }
+        }
+      },
+      {
+        name: "track",
+        value: {
+          target: ["a"],
+          mml: [{ name: "interval" }, { name: "length", value: [8, "."] }]
+        }
+      }
+    ]
+  });
+  expect(
+    mml.parse(`@v01 //comment
+ nes //comment
+ { //comment
+ PARAM1: 1 //comment
+//comment
+ PARAM2: 2
+ } //comment
+//comment
+`)
+  ).toMatchObject({
+    status: true,
+    value: [
+      {
+        name: "define_tone",
+        value: {
+          name: "v01",
+          type: "nes",
+          params: {
+            param1: [{ value: 1 }],
+            param2: [{ value: 2 }]
+          }
+        }
+      }
+    ]
+  });
+});
+test("setTone", () => {
+  expect(mml.parse("a c@1de")).toMatchObject(
+    track("a", [{}, { name: "set_tone", value: 1 }, {}, {}])
+  );
+  expect(mml.parse("a c@`1d`e")).toMatchObject(
+    track("a", [{}, { name: "set_tone", value: "1d" }, {}])
+  );
+  expect(mml.parse("a c@e")).toMatchObject({
+    status: false
+  });
 });

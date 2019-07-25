@@ -63,13 +63,18 @@ class MmlCompiler {
       velocity: 8 / 15,
       quantize: 1.0
     };
+    this.clear();
   }
   clear() {
     this.index = 1;
     this.tracks = {};
+    this.tones = {};
   }
   getTrack(name) {
-    return this.tracks[name];
+    if (this.tracks[name]) {
+      return this.tracks[name];
+    }
+    return this.createTrack(name);
   }
   createTrack(name) {
     this.tracks[name] = _.merge(
@@ -85,6 +90,9 @@ class MmlCompiler {
   }
   getData() {
     return _.mapValues(this.tracks, tr => tr.data);
+  }
+  getTone() {
+    return this.tones;
   }
   compile(src) {
     this.clear();
@@ -103,13 +111,22 @@ class MmlCompiler {
         }
       );
     }
+    //base layer
     ast.value.forEach(n => {
       if (n.name == "track") {
         n.value.target.forEach(name => {
           let track = this.getTrack(name);
-          if (!track) track = this.createTrack(name);
           track.token = _.concat(track.token, n.value.mml);
         });
+      } else if (n.name == "define_tone") {
+        const def = n.value;
+        this.tones[def.name] = _.merge(
+          {
+            start: n.start,
+            end: n.end
+          },
+          def
+        );
       }
     });
     _.forIn(this.tracks, (track, name) => {
@@ -271,6 +288,17 @@ class MmlCompiler {
           } else {
             loop_stack.pop();
           }
+          break;
+        case "set_tone":
+          if (!this.tones[c.value]) {
+            triggerError(`compileError: undefined tone`, c.start, c.end);
+          }
+          push({
+            type: "set_tone",
+            tone: c.value
+          });
+          break;
+        default:
           break;
       }
     }

@@ -151,13 +151,16 @@ test("sepBy", () => {
   ).trim(P.optWhitespace);
   const defineParams = P.seqMap(
     P.string("@"),
-    identifier.trim(P.optWhitespace),
+    identifier.desc("identifier"),
+    P.whitespace,
+    identifier.trim(P.optWhitespace).desc("type"),
     P.string("{"),
     param.many(),
     P.string("}"),
-    (s, name, o, params, c) => {
+    (s, name, div, type, o, params, c) => {
       return {
         identifier: name,
+        type: type,
         params: _.zipObject(params.map(x => x[0]), params.map(x => x[1]))
       };
     }
@@ -171,7 +174,7 @@ test("sepBy", () => {
   });
   expect(
     defineParams.parse(
-      `@V01 {
+      `@v01 nes {
 PARAM1: 1,2,3
 PA_RAM2: "string\\""
 }`
@@ -182,6 +185,7 @@ PA_RAM2: "string\\""
       name: "defineParam",
       value: {
         identifier: "v01",
+        type: "nes",
         params: {
           param1: [{ value: 1 }, { value: 2 }, { value: 3 }],
           pa_ram2: [{ value: 'string"' }]
