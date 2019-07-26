@@ -115,7 +115,7 @@ export default {
     codemirror() {
       return this.$refs.cm.codemirror;
     },
-    ...mapState("synth", {
+    ...mapState("engine", {
       mml: "mml",
       mmlError: "mmlError"
     })
@@ -124,7 +124,7 @@ export default {
     const cm = this.codemirror;
     this.initCodeMirror(cm);
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type == "synth/updateMmlError") {
+      if (mutation.type == "engine/updateMmlError") {
         lastError = mutation.payload;
       }
     });
@@ -132,18 +132,18 @@ export default {
       const note = action.payload;
       let start, end;
       switch (action.type) {
-        case "synth/playSequence":
-        case "synth/stopSequence":
+        case "engine/playSequence":
+        case "engine/stopSequence":
           _.forIn(this.selections, mark => mark.clear());
           this.selections = {};
           break;
-        case "synth/selectNote":
-        case "synth/noteOn":
+        case "engine/selectNote":
+        case "engine/noteOn":
           this.changeCursorByProc = true;
           start = new CM.Pos(note.start.line - 1, note.start.column - 1);
           end = new CM.Pos(note.end.line - 1, note.end.column - 1);
 
-          if (action.type == "synth/selectNote") {
+          if (action.type == "engine/selectNote") {
             cm.focus();
             cm.setCursor(start);
           }
@@ -154,7 +154,7 @@ export default {
             className: "flush"
           });
           break;
-        case "synth/noteOff":
+        case "engine/noteOff":
           if (this.selections[note.tr]) {
             this.selections[note.tr].clear();
           }
@@ -165,7 +165,7 @@ export default {
   methods: {
     initCodeMirror(cm) {
       cm.on("change", (cm, ch) => {
-        this.$store.dispatch("synth/changeMML", cm.getValue());
+        this.$store.dispatch("engine/changeMML", cm.getValue());
       });
       cm.on("cursorActivity", cm => {
         if (this.changeCursorByProc) {
@@ -173,7 +173,7 @@ export default {
           return;
         }
         const cursor = cm.getCursor();
-        this.$store.dispatch("synth/changeCursorMML", {
+        this.$store.dispatch("engine/changeCursorMML", {
           line: cursor.line + 1,
           column: cursor.ch + 1
         });

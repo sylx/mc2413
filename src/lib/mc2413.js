@@ -68,7 +68,7 @@ class Synth {
       let type = action.type,
         payload = action.payload;
       switch (type) {
-        case "synth/noteOnTestTone":
+        case "engine/noteOnTestTone":
           if (test_note != payload) {
             if (test_note === null) {
               this.noteOn(payload, 0.5);
@@ -78,11 +78,11 @@ class Synth {
           }
           test_note = payload;
           break;
-        case "synth/noteOffTestTone":
+        case "engine/noteOffTestTone":
           this.noteOff();
           test_note = null;
           break;
-        case "synth/selectNote":
+        case "engine/selectNote":
           this.noteOn(payload.interval, 0.5);
           setTimeout(
             (() => {
@@ -140,13 +140,13 @@ class Sequencer {
       let type = action.type,
         payload = action.payload;
       switch (type) {
-        case "synth/playSequence":
+        case "engine/playSequence":
           if (transport.state == "started") transport.stop(0);
           this.storeEvent(state);
           Tone.context.latencyHint = "playback";
           transport.start();
           break;
-        case "synth/stopSequence":
+        case "engine/stopSequence":
           transport.stop();
           Tone.context.latencyHint = "interactive";
           break;
@@ -164,13 +164,13 @@ class Sequencer {
               Tone.context.lookAhead + Tone.context.baseLatency
             ).toTicks() /
               192;
-          this.store.dispatch("synth/tickSequence", time > 0 ? time : 0);
+          this.store.dispatch("engine/tickSequence", time > 0 ? time : 0);
         }, time);
       }).bind(this),
       0.05
     ).start();
 
-    _.forIn(state.synth.sequence, this.processTrack.bind(this));
+    _.forIn(state.engine.sequence, this.processTrack.bind(this));
   }
   processTrack(data, name) {
     this.synth.createChannel(name);
@@ -205,7 +205,7 @@ class Sequencer {
         let before = evt.time - 2;
         if (before > 2) {
           Tone.Draw.schedule(() => {
-            this.store.dispatch("synth/beforeNoteOn", evt);
+            this.store.dispatch("engine/beforeNoteOn", evt);
           }, _beats(before));
         }
       });
@@ -222,10 +222,10 @@ class Sequencer {
           evt.tr
         );
         Tone.Draw.schedule(() => {
-          this.store.dispatch("synth/noteOn", evt);
+          this.store.dispatch("engine/noteOn", evt);
         }, time);
         Tone.Draw.schedule(() => {
-          this.store.dispatch("synth/noteOff", evt);
+          this.store.dispatch("engine/noteOff", evt);
         }, Tone.Time(Tone.Time(time).toTicks() + evt.duration * 192, "i"));
         break;
     }

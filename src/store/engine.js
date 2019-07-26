@@ -2,16 +2,21 @@ import { MmlCompiler as compiler } from "../lib/mml";
 import _ from "lodash";
 import sample from "../../examples/ff3.mml";
 
-const compileMML = src => compiler.compile(src);
-
-let initialMML = sample;
+const initialMml = sample;
+let initialSeq = "",
+  initialMmlError = null;
+try {
+  initialSeq = compiler.compile(sample);
+} catch (e) {
+  initialMmlError = e;
+}
 
 export default {
   namespaced: true,
   state: {
-    mml: initialMML,
-    mmlError: null,
-    sequence: compileMML(initialMML),
+    mml: initialMml,
+    mmlError: initialMmlError,
+    sequence: initialSeq,
     transportPlaying: false
   },
   getters: {
@@ -45,7 +50,7 @@ export default {
     changeMML(context, text) {
       context.commit("updateMml", text);
       try {
-        context.commit("updateSequence", compileMML(text));
+        context.commit("updateSequence", compiler.compile(text));
         context.commit("updateMmlError", null);
       } catch (e) {
         context.dispatch("errorMML", e);
@@ -53,7 +58,6 @@ export default {
     },
     changeCursorMML(context, pos) {},
     errorMML(context, e) {
-      console.error(e.toString());
       context.commit("updateMmlError", e);
     },
     changePianoRoll(context, sequence) {

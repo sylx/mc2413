@@ -98,23 +98,23 @@ export default {
         s = _.padStart(Math.floor((this.transportPosition % 1) * 16), 2, "0");
       return `${m}:${b}:${s}`;
     },
-    ...mapState("synth", {
+    ...mapState("engine", {
       transportPlaying: "transportPlaying"
     })
   },
   mounted() {
     this.$store.subscribeAction((action, state) => {
-      if (action.type == "synth/tickSequence") {
+      if (action.type == "engine/tickSequence") {
         this.transportPosition = action.payload;
       }
     });
   },
   methods: {
     playTransport() {
-      this.$store.dispatch("synth/playSequence");
+      this.$store.dispatch("engine/playSequence");
     },
     stopTransport() {
-      this.$store.dispatch("synth/stopSequence");
+      this.$store.dispatch("engine/stopSequence");
     }
   }
 };

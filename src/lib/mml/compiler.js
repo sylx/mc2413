@@ -80,7 +80,6 @@ class MmlCompiler {
     this.tracks[name] = _.merge(
       {
         time: 0,
-        token: [],
         data: [],
         name
       },
@@ -112,11 +111,13 @@ class MmlCompiler {
       );
     }
     //base layer
+    const token = {};
     ast.value.forEach(n => {
       if (n.name == "track") {
         n.value.target.forEach(name => {
           let track = this.getTrack(name);
-          track.token = _.concat(track.token, n.value.mml);
+          if (!token[name]) token[name] = [];
+          Array.prototype.push.apply(token[name], n.value.mml);
         });
       } else if (n.name == "define_tone") {
         const def = n.value;
@@ -130,12 +131,11 @@ class MmlCompiler {
       }
     });
     _.forIn(this.tracks, (track, name) => {
-      this.compileMml(track);
+      this.compileMml(track, token[name]);
     });
     return this.getData();
   }
-  compileMml(track) {
-    const token = track.token;
+  compileMml(track, token) {
     let is_slur = false;
     const calcDuration = (length, quantize) => {
       return length * quantize;

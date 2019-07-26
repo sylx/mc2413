@@ -65,7 +65,7 @@ export default {
     );
 
     this.$store.subscribeAction((action, state) => {
-      if (action.type == "synth/tickSequence") {
+      if (action.type == "engine/tickSequence") {
         const time = action.payload;
         let x = this.getXfromTime(time);
         this.cursorX = x;
@@ -74,19 +74,19 @@ export default {
           this.setStagePos(x - cx, this.stage_pos.y);
         }
       }
-      if (action.type == "synth/beforeNoteOn") {
+      if (action.type == "engine/beforeNoteOn") {
         const note = action.payload;
         this.setCenterInterval(note.interval);
       }
-      if (action.type == "synth/noteOn") {
+      if (action.type == "engine/noteOn") {
         const note = action.payload;
         this.flushKeyboard(true, note);
       }
-      if (action.type == "synth/noteOff") {
+      if (action.type == "engine/noteOff") {
         const note = action.payload;
         this.flushKeyboard(false, note, 100);
       }
-      if (action.type == "synth/changeCursorMML") {
+      if (action.type == "engine/changeCursorMML") {
         const pos = action.payload;
         let note = null,
           last = { line: 1, column: 1 };
@@ -117,7 +117,7 @@ export default {
     grid_offset() {
       return (this.stage_pos.x % (this.quantize_width * this.quantize)) * -1;
     },
-    ...mapGetters("synth", {
+    ...mapGetters("engine", {
       note: "noteSequence"
     })
   },
@@ -177,18 +177,18 @@ export default {
       let note = e.target.dataset.note + e.target.parentNode.dataset.octave;
       switch (type) {
         case "down":
-          this.$store.dispatch("synth/noteOnTestTone", note);
+          this.$store.dispatch("engine/noteOnTestTone", note);
           break;
         case "up":
-          this.$store.dispatch("synth/noteOffTestTone");
+          this.$store.dispatch("engine/noteOffTestTone");
           break;
         case "move":
           if (e.buttons) {
-            this.$store.dispatch("synth/noteOnTestTone", note);
+            this.$store.dispatch("engine/noteOnTestTone", note);
           }
           break;
         case "out":
-          this.$store.dispatch("synth/noteOffTestTone");
+          this.$store.dispatch("engine/noteOffTestTone");
           break;
       }
     },
@@ -296,7 +296,7 @@ export default {
       this.setCenterInterval(note.interval, note.time);
       this.cursorX = this.getXfromTime(note.time);
       this.selection = note;
-      this.$store.dispatch("synth/selectNote", note);
+      this.$store.dispatch("engine/selectNote", note);
     },
     setCenterInterval(interval, time) {
       let y = this.getYfromNote(interval) * this.scale,
