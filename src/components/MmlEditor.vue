@@ -32,18 +32,17 @@ import CM from "codemirror";
 CM.defineMode("mml", () => {
   return {
     startState: function(basecolumn) {
-      console.log("startState", arguments);
       return {
         ctx: null
       };
     },
     token(stream, state) {
       if (stream.column() == 0) {
-        if (stream.match(/^\s*[a-z0-9]+/)) {
+        if (state.ctx === null && stream.match(/^\s*[a-z0-9]+/)) {
           state.ctx = "track";
           return "qualifier";
         }
-        if (stream.match(/^\s*@.+\s+/)) {
+        if (stream.match(/^\s*@.+?\s+.+?:/)) {
           state.ctx = "define_tone";
           return "variable";
         }
@@ -52,10 +51,16 @@ CM.defineMode("mml", () => {
         if (stream.match(/".+?"/)) {
           return "string";
         }
-        if (stream.match(/{/)) {
+        if (stream.match(/.+?:/)) {
+          return "keyword";
+        }
+        if (stream.match(",")) {
+          return "operator";
+        }
+        if (stream.match("{")) {
           return "bracket";
         }
-        if (stream.match(/}/)) {
+        if (stream.match("}")) {
           state.ctx = null;
           return "bracket";
         }
@@ -74,6 +79,11 @@ CM.defineMode("mml", () => {
       } else {
         stream.next();
         return null;
+      }
+    },
+    indent: (state, textAfter) => {
+      if (state.ctx == "define_tone" && textAfter != "}") {
+        return 2;
       }
     }
   };

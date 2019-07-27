@@ -201,12 +201,13 @@ const define = P.createLanguage({
       identifier.desc("name"),
       r.whitespace,
       identifier.desc("type"),
+      P.string(":"),
       r.optWhitespace,
       P.string("{"),
       r.value.many().trim(r.optWhitespace),
       P.string("}"),
       comment.or(empty),
-      (s, name, div, type, sp, o, params, c) => {
+      (s, name, div, type, colon, sp, o, params, c) => {
         return {
           name,
           type,

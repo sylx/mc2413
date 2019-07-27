@@ -163,7 +163,8 @@ test("loop", () => {
 
 test("defineTone", () => {
   expect(
-    mml.parse(`@v01 nes {
+    mml.parse(`@v01 nes:
+{
 PARAM1: 1,"b",3
  PARAM2 : "a",,""
 }
@@ -194,7 +195,7 @@ a a8.
   });
   expect(
     mml.parse(`@v01 //comment
- nes //comment
+ nes: //comment
  { //comment
  PARAM1: 1 //comment
 //comment
