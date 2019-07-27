@@ -40,14 +40,14 @@
 </style>
 
 <script>
-import MC2413 from "./lib/mc2413.js";
+import Engine from "./lib/engine.js";
 
-let mc2413 = new MC2413();
+const engine = new Engine();
 
 export default {
   name: "app",
   mounted() {
-    mc2413.connectStore(this.$store);
+    engine.connectStore(this.$store);
   }
 };
 </script>
