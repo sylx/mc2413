@@ -49,10 +49,15 @@ class Sequencer {
       0.05
     ).start();
 
+    if (state.engine.tempo) {
+      transport.bpm.value = state.engine.tempo;
+    }
+    _.forIn(state.engine.trackType, (type, name) => {
+      this.synth.createChannel(name, type);
+    });
     _.forIn(state.engine.sequence, this.processTrack.bind(this));
   }
   processTrack(data, name) {
-    this.synth.createChannel(name);
     let part = new Tone.Part(
       this.processEvent.bind(this),
       _.map(data, d => [_beats(d.time), d])

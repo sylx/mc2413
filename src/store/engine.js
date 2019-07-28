@@ -1,22 +1,13 @@
 import { MmlCompiler as compiler } from "../lib/mml";
 import _ from "lodash";
-import sample from "../../examples/ff3.mml";
-
-const initialMml = sample;
-let initialSeq = "",
-  initialMmlError = null;
-try {
-  initialSeq = compiler.compile(sample);
-} catch (e) {
-  initialMmlError = e;
-}
-
 export default {
   namespaced: true,
   state: {
-    mml: initialMml,
-    mmlError: initialMmlError,
-    sequence: initialSeq,
+    mml: "",
+    mmlError: null,
+    trackType: {},
+    tempo: 120,
+    sequence: [],
     transportPlaying: false
   },
   getters: {
@@ -33,6 +24,12 @@ export default {
   mutations: {
     updateSequence(state, sequence) {
       state.sequence = sequence;
+    },
+    updateTrackType(state, type) {
+      state.trackType = type;
+    },
+    updateTempo(state, tempo) {
+      state.tempo = tempo;
     },
     updateMml: (state, mml) => {
       state.mml = mml;
@@ -51,6 +48,8 @@ export default {
       context.commit("updateMml", text);
       try {
         context.commit("updateSequence", compiler.compile(text));
+        context.commit("updateTrackType", compiler.getTrackType());
+        context.commit("updateTempo", compiler.tempo);
         context.commit("updateMmlError", null);
       } catch (e) {
         context.dispatch("errorMML", e);

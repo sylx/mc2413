@@ -43,11 +43,13 @@
 import Engine from "./lib/engine.js";
 
 const engine = new Engine();
+import sample from "../examples/ff3.mml";
 
 export default {
   name: "app",
   mounted() {
     engine.connectStore(this.$store);
+    this.$store.dispatch("engine/changeMML", sample);
   }
 };
 </script>
