@@ -63,6 +63,7 @@ class MmlCompiler {
       velocity: 8 / 15,
       quantize: 1.0
     };
+    this.tempo = null;
     this.clear();
   }
   clear() {
@@ -80,6 +81,7 @@ class MmlCompiler {
     this.tracks[name] = _.merge(
       {
         time: 0,
+        type: null,
         data: [],
         name
       },
@@ -92,6 +94,9 @@ class MmlCompiler {
   }
   getTone() {
     return this.tones;
+  }
+  getTrackType() {
+    return _.mapValues(this.tracks, tr => tr.type);
   }
   compile(src) {
     this.clear();
@@ -128,10 +133,18 @@ class MmlCompiler {
           },
           def
         );
+      } else if (n.name == "define_track") {
+        const def = n.value;
+        def.target.forEach(tr => {
+          let track = this.getTrack(tr);
+          track.type = def.type;
+        });
+      } else if (n.name == "define_tempo") {
+        this.tempo = n.value;
       }
     });
     _.forIn(this.tracks, (track, name) => {
-      this.compileMml(track, token[name]);
+      if (token[name]) this.compileMml(track, token[name]);
     });
     return this.getData();
   }
@@ -292,6 +305,15 @@ class MmlCompiler {
         case "set_tone":
           if (!this.tones[c.value]) {
             triggerError(`compileError: undefined tone`, c.start, c.end);
+          }
+          if (this.tones[c.value].type != track.type) {
+            const to_type = this.tones[c.value].type;
+            const tr_type = track.type;
+            triggerError(
+              `compileError: invalid tone type. tone type is ${to_type},but track type is ${tr_type}`,
+              c.start,
+              c.end
+            );
           }
           push({
             type: "set_tone",

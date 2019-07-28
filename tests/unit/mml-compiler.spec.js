@@ -279,3 +279,13 @@ a ] e`
     ]
   });
 });
+
+test("define_tempo", () => {
+  compiler.compile("#tempo 138");
+  expect(compiler.tempo).toEqual(138);
+});
+
+test("define_track", () => {
+  compiler.compile("#track a 2a03");
+  expect(compiler.getTrack("a").type).toEqual("2a03");
+});

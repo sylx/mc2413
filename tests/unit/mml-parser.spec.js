@@ -73,9 +73,36 @@ test("track", () => {
       }
     ])
   );
-  expect(mml.parse(" 23 cde")).toMatchObject({ status: true });
+  expect(mml.parse(" 23 cde //comment")).toMatchObject({ status: true });
   expect(mml.parse("_ cde")).toMatchObject({ status: false });
   expect(mml.parse("8c\ncde")).toMatchObject({ status: false });
+});
+
+test("trackName", () => {
+  expect(mml.parse("A-C c")).toMatchObject(
+    track("abc", [
+      {
+        name: "interval",
+        value: "c"
+      }
+    ])
+  );
+  expect(mml.parse("a1-3e c")).toMatchObject(
+    track("a123e", [
+      {
+        name: "interval",
+        value: "c"
+      }
+    ])
+  );
+  expect(mml.parse("a-9 c")).toMatchObject(
+    track("a9", [
+      {
+        name: "interval",
+        value: "c"
+      }
+    ])
+  );
 });
 
 test("empty track", () => {
@@ -163,7 +190,7 @@ test("loop", () => {
 
 test("defineTone", () => {
   expect(
-    mml.parse(`@v01 nes:
+    mml.parse(`@1:2a03
 {
 PARAM1: 1,"b",3
  PARAM2 : "a",,""
@@ -176,8 +203,8 @@ a a8.
       {
         name: "define_tone",
         value: {
-          name: "v01",
-          type: "nes",
+          name: 1,
+          type: "2a03",
           params: {
             param1: [{ value: 1 }, { value: "b" }, { value: 3 }],
             param2: [{ value: "a" }, { value: "" }, { value: "" }]
@@ -194,8 +221,7 @@ a a8.
     ]
   });
   expect(
-    mml.parse(`@v01 //comment
- nes: //comment
+    mml.parse(` @\`piano\`:2a03 //comment
  { //comment
  PARAM1: 1 //comment
 //comment
@@ -209,8 +235,8 @@ a a8.
       {
         name: "define_tone",
         value: {
-          name: "v01",
-          type: "nes",
+          name: "piano",
+          type: "2a03",
           params: {
             param1: [{ value: 1 }],
             param2: [{ value: 2 }]
@@ -229,5 +255,34 @@ test("setTone", () => {
   );
   expect(mml.parse("a c@e")).toMatchObject({
     status: false
+  });
+});
+
+test("define_tempo", () => {
+  expect(mml.parse(" #tempo 138 //comment\na c")).toMatchObject({
+    status: true,
+    value: [
+      {
+        name: "define_tempo",
+        value: 138
+      },
+      {}
+    ]
+  });
+});
+
+test("define_track", () => {
+  expect(mml.parse(" #track a-f 2314R //comment\na c")).toMatchObject({
+    status: true,
+    value: [
+      {
+        name: "define_track",
+        value: {
+          target: ["a", "b", "c", "d", "e", "f"],
+          type: "2314r"
+        }
+      },
+      {}
+    ]
   });
 });

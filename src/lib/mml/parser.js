@@ -163,22 +163,48 @@ const Mml = P.createLanguage({
   }
 });
 
-const track = P.seqMap(
-  P.regexp(/[a-z0-9]+/i),
-  whitespace,
-  Mml.mml,
-  (tr, sp, mml) => {
-    return {
-      target: _.filter(tr.split("").map(a => _.trim(a).toLowerCase())),
-      mml: mml
-    };
+const trackName = P.seqMap(
+  P.regexp(/[a-z0-9]/i),
+  P.seqMap(P.string("-"), P.regexp(/[a-z0-9]/i), (a, b) => b).or(empty),
+  (start, end) => {
+    if (isEmpty(end)) {
+      return [start.toLowerCase()];
+    } else {
+      // expand trackname
+      const s = start.toLowerCase(),
+        e = end.toLowerCase(),
+        sc = s.charCodeAt(0),
+        ec = e.charCodeAt(0),
+        CODE_A = "a".charCodeAt(0),
+        CODE_Z = "z".charCodeAt(0),
+        CODE_0 = "0".charCodeAt(0),
+        CODE_9 = "9".charCodeAt(0);
+      const ret = [];
+      if (sc >= CODE_A && sc <= CODE_Z && ec >= CODE_A && ec <= CODE_Z) {
+        return _.range(sc, ec + 1).map(x => String.fromCharCode(x));
+      } else if (sc >= CODE_0 && sc <= CODE_9 && ec >= CODE_0 && ec <= CODE_9) {
+        return _.range(sc, ec + 1).map(x => String.fromCharCode(x));
+      } else {
+        return [s, e];
+      }
+    }
   }
 )
+  .many()
+  .map(a => _.flatten(a))
+  .desc("trackName");
+
+const track = P.seqMap(trackName, whitespace, Mml.mml, (tr, sp, mml) => {
+  return {
+    target: tr,
+    mml: mml
+  };
+})
   .trim(optWhitespace)
   .node("track")
   .desc("track");
 
-const define = P.createLanguage({
+const setParams = P.createLanguage({
   whitespace: r => P.alt(P.whitespace, comment).many(), //with newline...
   optWhitespace: r => P.alt(r.whitespace, empty),
   value: r => {
@@ -195,30 +221,68 @@ const define = P.createLanguage({
       (ident, colon, values) => [ident, values]
     );
   },
+  toneName: r => {
+    return P.alt(
+      number,
+      P.seqMap(P.string("`"), identifier, P.string("`"), (o, v, c) => v)
+    );
+  },
   tone: r => {
     return P.seqMap(
       P.string("@"),
-      identifier.desc("name"),
-      r.whitespace,
+      r.toneName.desc("name"),
+      P.string(":").trim(r.optWhitespace),
       identifier.desc("type"),
-      P.string(":"),
       r.optWhitespace,
       P.string("{"),
       r.value.many().trim(r.optWhitespace),
       P.string("}"),
       comment.or(empty),
-      (s, name, div, type, colon, sp, o, params, c) => {
+      (s, name, div, type, sp, o, params, c) => {
         return {
           name,
           type,
           params: _.zipObject(params.map(x => x[0]), params.map(x => x[1]))
         };
       }
-    ).node("define_tone");
+    )
+      .trim(optWhitespace)
+      .node("define_tone");
   }
 });
 
-const MmlParser = P.alt(comment, track, define.tone, empty)
+const setGlobal = P.createLanguage({
+  track: r => {
+    return P.seqMap(
+      P.string("track"),
+      whitespace,
+      trackName,
+      whitespace,
+      identifier,
+      (sig, sp1, target, sp2, type) => {
+        return {
+          target,
+          type
+        };
+      }
+    ).node("define_track");
+  },
+  tempo: r => {
+    return P.seqMap(P.string("tempo"), whitespace, number, (sig, sp, tempo) => {
+      return tempo;
+    }).node("define_tempo");
+  },
+  define: r => {
+    return P.seqMap(
+      P.string("#"),
+      P.alt(r.tempo, r.track),
+      comment.or(empty),
+      (def, node, c) => node
+    ).trim(optWhitespace);
+  }
+});
+
+const MmlParser = P.alt(comment, track, setParams.tone, setGlobal.define, empty)
   .sepBy(P.newline)
   .map(r => {
     return r.filter(x => {
