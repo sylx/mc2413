@@ -303,21 +303,22 @@ class MmlCompiler {
           }
           break;
         case "set_tone":
-          if (!this.tones[c.value]) {
-            triggerError(`compileError: undefined tone`, c.start, c.end);
-          }
-          if (this.tones[c.value].type != track.type) {
-            const to_type = this.tones[c.value].type;
-            const tr_type = track.type;
-            triggerError(
-              `compileError: invalid tone type. tone type is ${to_type},but track type is ${tr_type}`,
-              c.start,
-              c.end
-            );
-          }
+          // if (!this.tones[c.value]) {
+          //   triggerError(`compileError: undefined tone`, c.start, c.end);
+          // }
+          //   if (this.tones[c.value].type != track.type) {
+          //     const to_type = this.tones[c.value].type;
+          //     const tr_type = track.type;
+          //     triggerError(
+          //       `compileError: invalid tone type. tone type is ${to_type},but track type is ${tr_type}`,
+          //       c.start,
+          //       c.end
+          //     );
+          //   }
           push({
             type: "set_tone",
-            tone: c.value
+            tone: c.value,
+            time: track.time
           });
           break;
         default:

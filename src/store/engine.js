@@ -6,6 +6,7 @@ export default {
     mml: "",
     mmlError: null,
     trackType: {},
+    tone: {},
     tempo: 120,
     sequence: [],
     transportPlaying: false
@@ -28,6 +29,9 @@ export default {
     updateTrackType(state, type) {
       state.trackType = type;
     },
+    updateTone(state, tone) {
+      state.tone = tone;
+    },
     updateTempo(state, tempo) {
       state.tempo = tempo;
     },
@@ -49,9 +53,11 @@ export default {
       try {
         context.commit("updateSequence", compiler.compile(text));
         context.commit("updateTrackType", compiler.getTrackType());
+        context.commit("updateTone", compiler.getTone());
         context.commit("updateTempo", compiler.tempo);
         context.commit("updateMmlError", null);
       } catch (e) {
+        console.error(e);
         context.dispatch("errorMML", e);
       }
     },

@@ -42,7 +42,7 @@ CM.defineMode("mml", () => {
           state.ctx = "track";
           return "qualifier";
         }
-        if (stream.match(/^\s*@.+?\s+.+?:/)) {
+        if (stream.match(/^\s*@.+?:.+/)) {
           state.ctx = "define_tone";
           return "variable";
         }
@@ -118,7 +118,8 @@ export default {
         styleSelectedText: true,
         lint: true,
         gutters: ["CodeMirror-lint-markers"]
-      }
+      },
+      selections: {}
     };
   },
   computed: {
@@ -138,39 +139,41 @@ export default {
         lastError = mutation.payload;
       }
     });
-    this.$store.subscribeAction((action, state) => {
-      const note = action.payload;
-      let start, end;
-      switch (action.type) {
-        case "engine/playSequence":
-        case "engine/stopSequence":
-          _.forIn(this.selections, mark => mark.clear());
-          this.selections = {};
-          break;
-        case "engine/selectNote":
-        case "engine/noteOn":
-          this.changeCursorByProc = true;
-          start = new CM.Pos(note.start.line - 1, note.start.column - 1);
-          end = new CM.Pos(note.end.line - 1, note.end.column - 1);
+    this.$store.subscribeAction(
+      ((action, state) => {
+        const note = action.payload;
+        let start, end;
+        switch (action.type) {
+          case "engine/playSequence":
+          case "engine/stopSequence":
+            _.forIn(this.selections, mark => mark.clear());
+            this.selections = {};
+            break;
+          case "engine/selectNote":
+          case "engine/noteOn":
+            this.changeCursorByProc = true;
+            start = new CM.Pos(note.start.line - 1, note.start.column - 1);
+            end = new CM.Pos(note.end.line - 1, note.end.column - 1);
 
-          if (action.type == "engine/selectNote") {
-            cm.focus();
-            cm.setCursor(start);
-          }
-          if (this.selections[note.tr]) {
-            this.selections[note.tr].clear();
-          }
-          this.selections[note.tr] = cm.markText(start, end, {
-            className: "flush"
-          });
-          break;
-        case "engine/noteOff":
-          if (this.selections[note.tr]) {
-            this.selections[note.tr].clear();
-          }
-          break;
-      }
-    });
+            if (action.type == "engine/selectNote") {
+              cm.focus();
+              cm.setCursor(start);
+            }
+            if (this.selections[note.tr]) {
+              this.selections[note.tr].clear();
+            }
+            this.selections[note.tr] = cm.markText(start, end, {
+              className: "flush"
+            });
+            break;
+          case "engine/noteOff":
+            if (this.selections[note.tr]) {
+              this.selections[note.tr].clear();
+            }
+            break;
+        }
+      }).bind(this)
+    );
   },
   methods: {
     initCodeMirror(cm) {

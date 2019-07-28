@@ -1,12 +1,22 @@
 // FF3 Theme
 
 //define
+#track a-c 2a03
+
+@1:2a03{
+  wv: "sqrt"
+}
+
+@3:2a03{
+  wv: "tri"
+}
+
 
 // Intro
 t t136 L1
-a o5L4v15
-b o4L8v11
-c o3L2v13
+a o5L4v15@1
+b o4L8v11@1
+c o3L2v13@3
 
 t rrrr
 a g+d+ef+ g2f+e e1 d+2...r16

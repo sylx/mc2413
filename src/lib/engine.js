@@ -8,8 +8,8 @@ const transport = Tone.Transport;
 const _beats = (beats, add) => Tone.Time(beats * 192 + (add ? add : 0), "i");
 
 class Sequencer {
-  constructor(synth) {
-    this.synth = synth;
+  constructor(controller) {
+    this.controller = controller;
     transport.PPQ = 192;
     transport.loop = false;
   }
@@ -52,9 +52,6 @@ class Sequencer {
     if (state.engine.tempo) {
       transport.bpm.value = state.engine.tempo;
     }
-    _.forIn(state.engine.trackType, (type, name) => {
-      this.synth.createChannel(name, type);
-    });
     _.forIn(state.engine.sequence, this.processTrack.bind(this));
   }
   processTrack(data, name) {
@@ -82,6 +79,16 @@ class Sequencer {
           part.loopEnd = _beats(evt.end);
         }, _beats(evt.time, 1)); //noteと同じタイミングだとnoteがスキップされるので、ずらす
       });
+    //set_tone
+    data
+      .filter(evt => evt.type === "set_tone")
+      .forEach(evt => {
+        const controller = this.controller;
+        transport.schedule(time => {
+          controller.setSynthParams(evt.tr, evt.tone);
+        }, _beats(evt.time));
+      });
+
     //before note
     data
       .filter(evt => evt.type == "note" || evt.type == "pitch")
@@ -98,7 +105,7 @@ class Sequencer {
     switch (evt.type) {
       case "note":
       case "pitch":
-        this.synth.noteOnOff(
+        this.controller.noteOnOff(
           evt.interval,
           _beats(evt.duration),
           time,
@@ -118,11 +125,11 @@ class Sequencer {
 
 class Engine {
   constructor() {
-    this.synth = new SynthController();
-    this.sequencer = new Sequencer(this.synth);
+    this.controller = new SynthController();
+    this.sequencer = new Sequencer(this.controller);
   }
   connectStore(store) {
-    this.synth.connectStore(store);
+    this.controller.connectStore(store);
     this.sequencer.connectStore(store);
   }
 }

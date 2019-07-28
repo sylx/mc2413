@@ -1,98 +1,112 @@
 import Tone from "tone";
 import _ from "lodash";
 
+import Synth_2a03 from "./Synth_2a03";
+
 class SynthController {
   constructor() {
-    this.tone = {};
-    this.selected_tone = "a";
-    this.initSynth();
-  }
-  initSynth() {
+    this.clearChannel();
     this.masterChannel = new Tone.Channel({
       volume: -10
     }).toMaster();
 
-    this.createChannel("a");
+    this.SynthTypes = {
+      "2a03": Synth_2a03
+    };
+    this.synthParams = {};
   }
-  createChannel(name) {
-    const tone = new Tone.Synth({
-      oscillator: {
-        type: "square"
-      },
-      envelope: {
-        attack: 0.005,
-        decay: 0.1,
-        sustain: 0.3,
-        release: 0.01
-      },
-      portamento: 0.0
-    });
-    tone.connect(this.masterChannel);
-    tone.name = name;
-    this.tone[name] = tone;
+  createChannel(name, type) {
+    if (!type) type = "2a03"; //default
+    const tone = new this.SynthTypes[type](this.masterChannel);
+    this.channel[name] = tone;
   }
-  getTone(name) {
-    if (!name) name = this.selected_tone;
-    return this.tone[name];
+  clearChannel() {
+    this.channel = {};
   }
-  selectTone(name) {
-    this.selected_tone = name;
+  getChannel(name) {
+    return this.channel[name];
   }
   noteOn(interval, velocity, time, channel) {
-    this.getTone(channel).triggerAttack(
+    return this.getChannel(channel).triggerAttack(
       this.normalizeInterval(interval),
       time,
       velocity
     );
   }
   noteChange(interval, time, channel) {
-    this.getTone(channel).setNote(this.normalizeInterval(interval), time);
+    return this.getChannel(channel).setNote(
+      this.normalizeInterval(interval),
+      time
+    );
   }
   noteOff(time, channel) {
-    this.getTone(channel).triggerRelease(time);
+    return this.getChannel(channel).triggerRelease(time);
   }
   noteOnOff(interval, duration, time, velocity, channel) {
-    this.getTone(channel).triggerAttackRelease(
+    return this.getChannel(channel).triggerAttackRelease(
       this.normalizeInterval(interval),
       duration,
       time,
       velocity
     );
   }
+  registerSynthParams(params) {
+    this.synthParams = params;
+  }
+  setSynthParams(ch, name) {
+    const chann = this.getChannel(ch);
+    const tone = this.synthParams[name];
+    chann.setParams(tone);
+  }
   connectStore(store) {
     let test_note = null;
-
-    store.subscribeAction((action, state) => {
-      let type = action.type,
-        payload = action.payload;
-      switch (type) {
-        case "engine/noteOnTestTone":
-          if (test_note != payload) {
-            if (test_note === null) {
-              this.noteOn(payload, 0.5);
-            } else {
-              this.noteChange(payload);
-            }
-          }
-          test_note = payload;
+    store.subscribe((mutation, state) => {
+      switch (mutation.type) {
+        case "engine/updateTrackType":
+          this.clearChannel();
+          _.forIn(mutation.payload, (type, name) => {
+            this.createChannel(name, type);
+          });
           break;
-        case "engine/noteOffTestTone":
-          this.noteOff();
-          test_note = null;
-          break;
-        case "engine/selectNote":
-          this.noteOn(payload.interval, 0.5);
-          setTimeout(
-            (() => {
-              this.noteOff();
-            }).bind(this),
-            250
-          );
-          break;
-        default:
+        case "engine/updateTone":
+          this.registerSynthParams(mutation.payload);
           break;
       }
     });
+
+    store.subscribeAction(
+      ((action, state) => {
+        let type = action.type,
+          payload = action.payload;
+        switch (type) {
+          case "engine/noteOnTestTone":
+            if (test_note != payload) {
+              if (test_note === null) {
+                this.noteOn(payload, 0.5, undefined, "a");
+              } else {
+                this.noteChange(payload);
+              }
+            }
+            test_note = payload;
+            break;
+          case "engine/noteOffTestTone":
+            this.noteOff(undefined, "a");
+            test_note = null;
+            break;
+          case "engine/selectNote":
+            this.noteOnOff(
+              payload.interval,
+              0.25,
+              undefined,
+              payload.velocity,
+              payload.tr
+            );
+            break;
+          default:
+            break;
+        }
+      }).bind(this)
+    );
   }
   normalizeInterval(interval) {
     const trans = {

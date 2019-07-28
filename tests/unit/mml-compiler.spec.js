@@ -280,6 +280,12 @@ a ] e`
   });
 });
 
+test("set_tone", () => {
+  expect(compiler.compile("a @1")).toMatchObject({
+    a: [{ type: "set_tone", tone: 1 }]
+  });
+});
+
 test("define_tempo", () => {
   compiler.compile("#tempo 138");
   expect(compiler.tempo).toEqual(138);
