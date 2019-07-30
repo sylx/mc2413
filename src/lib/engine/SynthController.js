@@ -2,6 +2,7 @@ import Tone from "tone";
 import _ from "lodash";
 
 import Synth_2a03 from "./Synth_2a03";
+import Synth_experimental from "./Synth_experimental";
 
 class SynthController {
   constructor() {
@@ -11,16 +12,18 @@ class SynthController {
     }).toMaster();
 
     this.SynthTypes = {
-      "2a03": Synth_2a03
+      "2a03": Synth_2a03,
+      experimental: Synth_experimental
     };
     this.synthParams = {};
   }
   createChannel(name, type) {
-    if (!type) type = "2a03"; //default
+    if (!type || !this.SynthTypes[type]) type = "2a03"; //default
     const tone = new this.SynthTypes[type](this.masterChannel);
     this.channel[name] = tone;
   }
   clearChannel() {
+    _.forIn(this.channel, chann => chann.dispose());
     this.channel = {};
   }
   getChannel(name) {

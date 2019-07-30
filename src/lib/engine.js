@@ -12,6 +12,7 @@ class Sequencer {
     this.controller = controller;
     transport.PPQ = 192;
     transport.loop = false;
+    this.part = {};
   }
   connectStore(store) {
     this.store = store;

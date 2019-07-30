@@ -11,7 +11,6 @@ function hasParamsMixin(base = null) {
           this.setParam(key, obj.name, obj.default);
         });
       });
-      this.connect(master);
     }
     getName() {
       return "base";
